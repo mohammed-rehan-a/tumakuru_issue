@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% block title %}Best Citizen Certificate{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <div class="container px-4">
+    <nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li><li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li><li class="breadcrumb-item active">Certificate</li></ol></nav>
+    <h1 class="mt-2">🏆 Best Citizen Certificate</h1>
+  </div>
+  <div class="page-hero-tricolor"></div>
+</div>
+
+<div class="container px-4 py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+
+      <!-- Congratulations Banner -->
+      <div style="background:linear-gradient(135deg,var(--green),#1a9e14); border-radius:var(--radius); padding:28px; text-align:center; color:white; margin-bottom:32px">
+        <div style="font-size:52px; margin-bottom:12px">🎉</div>
+        <h2 style="font-family:'Playfair Display',serif; font-size:1.8rem; margin-bottom:8px">Congratulations!</h2>
+        <p style="opacity:.9; max-width:480px; margin:0 auto">You have achieved the <strong>Best Citizen Award</strong> from Tumakuru City Corporation for your outstanding civic participation!</p>
+      </div>
+
+      <!-- Certificate Preview -->
+      <div class="certificate-card mb-4">
+        <!-- Header -->
+        <div style="border-bottom:1px solid rgba(201,168,76,0.3); padding-bottom:20px; margin-bottom:24px; text-align:center">
+          <div style="display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:12px">
+            <div style="width:48px; height:48px; background:rgba(255,255,255,.08); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px; color:var(--gold-light)">
+              <i class="fas fa-city"></i>
+            </div>
+            <div style="text-align:left">
+              <div style="font-weight:700; color:white; font-size:15px">Tumakuru City Corporation</div>
+              <div style="font-size:12px; color:rgba(255,255,255,.5)">ತುಮಕೂರು ನಗರ ನಿಗಮ · Government of Karnataka</div>
+            </div>
+          </div>
+          <div style="color:rgba(255,255,255,.5); font-size:13px; letter-spacing:2px; text-transform:uppercase">Official Certificate</div>
+        </div>
+
+        <!-- Stars -->
+        <div style="text-align:center; color:var(--gold-light); font-size:24px; margin-bottom:20px; letter-spacing:8px">
+          ★ ★ ★
+        </div>
+
+        <!-- Title -->
+        <div style="text-align:center; margin-bottom:24px">
+          <span class="cert-icon"><i class="fas fa-award"></i></span>
+          <h2 style="font-family:'Playfair Display',serif; font-size:2rem; font-weight:700; color:var(--gold-light); margin-bottom:6px">Best Citizen Award</h2>
+          <div style="font-size:14px; color:rgba(255,255,255,.65); letter-spacing:1px">CERTIFICATE OF EXCELLENCE IN CIVIC PARTICIPATION</div>
+        </div>
+
+        <div style="border-top:1px solid rgba(201,168,76,.2); border-bottom:1px solid rgba(201,168,76,.2); padding:16px 0; margin-bottom:24px; text-align:center">
+          <div style="font-size:13px; color:rgba(255,255,255,.6); margin-bottom:6px">This certificate is proudly presented to</div>
+          <div style="font-family:'Playfair Display',serif; font-size:2rem; font-weight:700; color:var(--gold-light)">
+            {{ certificate.citizen.user.get_full_name }}
+          </div>
+          {% if certificate.citizen.ward_number %}
+          <div style="font-size:13px; color:rgba(255,255,255,.55); margin-top:4px">Ward {{ certificate.citizen.ward_number }}, Tumakuru</div>
+          {% endif %}
+        </div>
+
+        <div style="text-align:center; font-size:14px; color:rgba(255,255,255,.7); line-height:1.8; margin-bottom:24px">
+          In recognition of outstanding civic participation and dedication to the betterment<br>
+          of Tumakuru City by reporting <strong style="color:var(--gold-light)">{{ certificate.citizen.total_reports }} civic issues</strong> and earning<br>
+          <strong style="color:var(--gold-light)">{{ certificate.points_at_issue }} Civic Points</strong> — achieving the <strong style="color:var(--gold-light)">{{ certificate.milestone }}-Point Milestone</strong>.
+        </div>
+
+        <!-- Info grid -->
+        <div class="row g-3 mb-24">
+          <div class="col-3">
+            <div style="background:rgba(255,255,255,.06); border:1px solid rgba(201,168,76,.2); border-radius:8px; padding:14px; text-align:center">
+              <div style="font-size:11px; color:rgba(255,255,255,.5); text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px">Certificate No.</div>
+              <div style="font-family:monospace; font-weight:700; color:var(--gold-light); font-size:11px">{{ certificate.certificate_number }}</div>
+            </div>
+          </div>
+          <div class="col-3">
+            <div style="background:rgba(255,255,255,.06); border:1px solid rgba(201,168,76,.2); border-radius:8px; padding:14px; text-align:center">
+              <div style="font-size:11px; color:rgba(255,255,255,.5); text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px">Issue Date</div>
+              <div style="font-weight:700; color:var(--gold-light); font-size:12px">{{ certificate.issued_date|date:"d M Y" }}</div>
+            </div>
+          </div>
+          <div class="col-3">
+            <div style="background:rgba(255,255,255,.06); border:1px solid rgba(201,168,76,.2); border-radius:8px; padding:14px; text-align:center">
+              <div style="font-size:11px; color:rgba(255,255,255,.5); text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px">Civic Points</div>
+              <div style="font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:700; color:var(--gold-light)">{{ certificate.points_at_issue }}</div>
+            </div>
+          </div>
+          <div class="col-3">
+            <div style="background:rgba(255,255,255,.06); border:1px solid rgba(201,168,76,.2); border-radius:8px; padding:14px; text-align:center">
+              <div style="font-size:11px; color:rgba(255,255,255,.5); text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px">Milestone</div>
+              <div style="font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:700; color:var(--gold-light)">{{ certificate.milestone }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Signatures -->
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:32px; padding-top:20px; border-top:1px solid rgba(201,168,76,.2)">
+          <div style="text-align:center">
+            <div style="width:120px; height:1px; background:rgba(201,168,76,.5); margin:0 auto 8px"></div>
+            <div style="font-size:12px; font-weight:700; color:white">MUNICIPAL COMMISSIONER</div>
+            <div style="font-size:10px; color:rgba(255,255,255,.5)">Tumakuru City Corporation</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:28px; color:var(--gold-light)"><i class="fas fa-stamp"></i></div>
+            <div style="font-size:10px; color:rgba(255,255,255,.4); margin-top:4px">OFFICIAL SEAL</div>
+          </div>
+          <div style="text-align:center">
+            <div style="width:120px; height:1px; background:rgba(201,168,76,.5); margin:0 auto 8px"></div>
+            <div style="font-size:12px; font-weight:700; color:white">MAYOR</div>
+            <div style="font-size:10px; color:rgba(255,255,255,.5)">Tumakuru City Corporation</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap">
+        <a href="{% url 'download_certificate' certificate.pk %}" class="btn-gold">
+          <i class="fas fa-download"></i> Download as PDF
+        </a>
+        <a href="{% url 'dashboard' %}" class="btn-navy">
+          <i class="fas fa-tachometer-alt"></i> Back to Dashboard
+        </a>
+        <a href="{% url 'submit_report' %}" class="btn-primary-civic">
+          <i class="fas fa-plus-circle"></i> Report More Issues
+        </a>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

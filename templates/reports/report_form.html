@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% block title %}Report an Issue{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <div class="container px-4">
+    <nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li><li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li><li class="breadcrumb-item active">Report Issue</li></ol></nav>
+    <h1 class="mt-2">Report a Civic Issue</h1>
+    <p style="opacity:.75; margin:0">Your report earns <strong style="color:var(--gold-light)">5 civic points</strong>. Every report helps Tumakuru grow better.</p>
+  </div>
+  <div class="page-hero-tricolor"></div>
+</div>
+
+<div class="container px-4 py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-9">
+
+      <!-- Points reminder banner -->
+      <div style="background:linear-gradient(135deg,var(--navy),var(--navy-mid)); border-radius:var(--radius); padding:20px 24px; margin-bottom:28px; display:flex; align-items:center; gap:16px; color:white; flex-wrap:wrap">
+        <div style="font-size:32px; color:var(--gold-light)"><i class="fas fa-star"></i></div>
+        <div style="flex:1">
+          <div style="font-weight:700; font-size:15px">Earn 5 Civic Points for This Report</div>
+          <div style="font-size:13px; color:rgba(255,255,255,.65); margin-top:2px">
+            You currently have <strong style="color:var(--gold-light)">{{ user.profile.points }} points</strong>. 
+            You need <strong style="color:var(--gold-light)">{{ user.profile.points_to_next_certificate }} more points</strong> for your next Best Citizen Certificate.
+          </div>
+        </div>
+        <div style="text-align:center; background:rgba(255,255,255,.08); padding:12px 20px; border-radius:10px; flex-shrink:0">
+          <div style="font-family:'Playfair Display',serif; font-size:1.8rem; font-weight:700; color:var(--gold-light); line-height:1">{{ user.profile.points }}</div>
+          <div style="font-size:11px; color:rgba(255,255,255,.55)">Current Points</div>
+        </div>
+      </div>
+
+      <form method="post" enctype="multipart/form-data" id="reportForm">
+        {% csrf_token %}
+
+        <!-- Section 1: Issue Details -->
+        <div class="form-section mb-4">
+          <div class="form-section-header">
+            <div class="d-flex align-items-center gap-3">
+              <div style="background:rgba(255,255,255,.15); border-radius:8px; width:36px; height:36px; display:flex; align-items:center; justify-content:center;"><i class="fas fa-exclamation-circle"></i></div>
+              <div>
+                <div style="font-weight:700">Issue Details</div>
+                <div style="font-size:12px; opacity:.65">Describe the civic problem clearly</div>
+              </div>
+            </div>
+          </div>
+          <div class="form-section-body">
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label">Issue Title <span class="text-danger">*</span></label>
+                {{ form.title|add_class:"form-control" }}
+                {% if form.title.errors %}<div class="text-danger small mt-1">{{ form.title.errors }}</div>{% endif %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Issue Category <span class="text-danger">*</span></label>
+                {{ form.category|add_class:"form-select" }}
+                {% if form.category.errors %}<div class="text-danger small mt-1">{{ form.category.errors }}</div>{% endif %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Priority Level</label>
+                {{ form.priority|add_class:"form-select" }}
+              </div>
+              <div class="col-12">
+                <label class="form-label">Description <span class="text-danger">*</span></label>
+                {{ form.description|add_class:"form-control" }}
+                <div class="form-text">Provide as much detail as possible. Mention since when this issue exists.</div>
+                {% if form.description.errors %}<div class="text-danger small mt-1">{{ form.description.errors }}</div>{% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Location -->
+        <div class="form-section mb-4">
+          <div class="form-section-header">
+            <div class="d-flex align-items-center gap-3">
+              <div style="background:rgba(255,255,255,.15); border-radius:8px; width:36px; height:36px; display:flex; align-items:center; justify-content:center;"><i class="fas fa-map-marker-alt"></i></div>
+              <div>
+                <div style="font-weight:700">Location Details</div>
+                <div style="font-size:12px; opacity:.65">Help authorities find the issue quickly</div>
+              </div>
+            </div>
+          </div>
+          <div class="form-section-body">
+            <div class="row g-3">
+              <div class="col-md-8">
+                <label class="form-label">Street / Area Name <span class="text-danger">*</span></label>
+                {{ form.location|add_class:"form-control" }}
+                {% if form.location.errors %}<div class="text-danger small mt-1">{{ form.location.errors }}</div>{% endif %}
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Ward Number <span class="text-danger">*</span></label>
+                {{ form.ward_number|add_class:"form-select" }}
+                {% if form.ward_number.errors %}<div class="text-danger small mt-1">{{ form.ward_number.errors }}</div>{% endif %}
+              </div>
+              <div class="col-12">
+                <label class="form-label">Nearest Landmark</label>
+                {{ form.landmark|add_class:"form-control" }}
+                <div class="form-text">Example: "Near SBM Bank", "Opposite Government School"</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3: Photos -->
+        <div class="form-section mb-4">
+          <div class="form-section-header">
+            <div class="d-flex align-items-center gap-3">
+              <div style="background:rgba(255,255,255,.15); border-radius:8px; width:36px; height:36px; display:flex; align-items:center; justify-content:center;"><i class="fas fa-camera"></i></div>
+              <div>
+                <div style="font-weight:700">Photo Evidence</div>
+                <div style="font-size:12px; opacity:.65">Photos significantly speed up resolution</div>
+              </div>
+            </div>
+          </div>
+          <div class="form-section-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Primary Photo</label>
+                <div class="photo-upload-box" id="photo1Box">
+                  <label for="{{ form.image.id_for_label }}" style="cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:8px; color:var(--gray-600)">
+                    <i class="fas fa-cloud-upload-alt" style="font-size:32px; color:var(--gray-300)"></i>
+                    <span style="font-weight:600">Click to upload photo</span>
+                    <span style="font-size:12px">JPG, PNG up to 5MB</span>
+                  </label>
+                  {% render_field form.image style="display:none" id=form.image.id_for_label %}
+                </div>
+                {% if form.image.errors %}<div class="text-danger small mt-1">{{ form.image.errors }}</div>{% endif %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Additional Photo <span class="text-muted small">(optional)</span></label>
+                <div class="photo-upload-box">
+                  <label for="{{ form.image2.id_for_label }}" style="cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:8px; color:var(--gray-600)">
+                    <i class="fas fa-cloud-upload-alt" style="font-size:32px; color:var(--gray-300)"></i>
+                    <span style="font-weight:600">Click to upload photo</span>
+                    <span style="font-size:12px">JPG, PNG up to 5MB</span>
+                  </label>
+                  {% render_field form.image2 style="display:none" id=form.image2.id_for_label %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; background:white; border-radius:var(--radius); padding:24px; box-shadow:var(--shadow-sm); border:1px solid var(--gray-100)">
+          <div>
+            <div style="font-weight:700; color:var(--navy)">Ready to Submit?</div>
+            <div style="font-size:13px; color:var(--gray-600)">You'll earn <strong>5 Civic Points</strong> after submission.</div>
+          </div>
+          <div class="d-flex gap-3">
+            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
+            <button type="submit" class="btn-primary-civic" id="submitBtn">
+              <i class="fas fa-paper-plane"></i> Submit Report & Earn Points
+            </button>
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+.photo-upload-box {
+  border: 2px dashed var(--gray-300);
+  border-radius: var(--radius-sm);
+  padding: 32px 16px;
+  text-align: center;
+  background: var(--gray-50);
+  transition: var(--transition);
+}
+.photo-upload-box:hover { border-color: var(--navy-mid); background: white; }
+</style>
+
+{% block extra_js %}
+<script>
+// File input labels
+['{{ form.image.id_for_label }}', '{{ form.image2.id_for_label }}'].forEach(id => {
+  const input = document.getElementById(id);
+  if (!input) return;
+  input.addEventListener('change', function() {
+    if (this.files && this.files[0]) {
+      const label = this.closest('.photo-upload-box').querySelector('span');
+      if(label) label.textContent = this.files[0].name;
+    }
+  });
+});
+// Submit button feedback
+document.getElementById('reportForm').addEventListener('submit', function() {
+  const btn = document.getElementById('submitBtn');
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+  btn.disabled = true;
+});
+</script>
+{% endblock %}
+{% endblock %}

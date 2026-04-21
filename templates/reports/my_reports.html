@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block title %}My Reports{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <div class="container px-4">
+    <nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li><li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li><li class="breadcrumb-item active">My Reports</li></ol></nav>
+    <h1 class="mt-2">My Submitted Reports</h1>
+    <p style="opacity:.75; margin:0">{{ reports.count }} issue{{ reports.count|pluralize }} reported by you.</p>
+  </div>
+  <div class="page-hero-tricolor"></div>
+</div>
+
+<div class="container px-4 py-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h5 class="mb-0">All Reports</h5>
+    <a href="{% url 'submit_report' %}" class="btn-primary-civic" style="padding:10px 22px; font-size:13px">
+      <i class="fas fa-plus-circle"></i> New Report
+    </a>
+  </div>
+
+  {% if reports %}
+  <div class="detail-card">
+    <div style="overflow-x:auto">
+      <table class="table table-hover mb-0" style="font-size:13px">
+        <thead style="background:var(--gray-50)">
+          <tr>
+            <th style="padding:14px 16px; font-weight:600; color:var(--gray-600); font-size:11px; text-transform:uppercase; letter-spacing:.5px">Report ID</th>
+            <th style="padding:14px 16px; font-weight:600; color:var(--gray-600); font-size:11px; text-transform:uppercase; letter-spacing:.5px">Title</th>
+            <th style="padding:14px 16px; font-weight:600; color:var(--gray-600); font-size:11px; text-transform:uppercase; letter-spacing:.5px">Category</th>
+            <th style="padding:14px 16px; font-weight:600; color:var(--gray-600); font-size:11px; text-transform:uppercase; letter-spacing:.5px">Status</th>
+            <th style="padding:14px 16px; font-weight:600; color:var(--gray-600); font-size:11px; text-transform:uppercase; letter-spacing:.5px">Priority</th>
+            <th style="padding:14px 16px; font-weight:600; color:var(--gray-600); font-size:11px; text-transform:uppercase; letter-spacing:.5px">Points</th>
+            <th style="padding:14px 16px; font-weight:600; color:var(--gray-600); font-size:11px; text-transform:uppercase; letter-spacing:.5px">Date</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for report in reports %}
+          <tr>
+            <td style="padding:14px 16px; font-family:monospace; font-weight:700; color:var(--saffron); font-size:12px">{{ report.report_id }}</td>
+            <td style="padding:14px 16px">
+              <div style="font-weight:600; color:var(--gray-800); max-width:220px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ report.title }}</div>
+              <div style="font-size:11px; color:var(--gray-600)"><i class="fas fa-map-marker-alt me-1" style="color:var(--saffron)"></i>Ward {{ report.ward_number }}</div>
+            </td>
+            <td style="padding:14px 16px">
+              {% if report.category %}
+              <div class="category-chip">
+                <i class="{{ report.category.icon }}" style="color:{{ report.category.color }}"></i>
+                {{ report.category.name }}
+              </div>
+              {% else %}—{% endif %}
+            </td>
+            <td style="padding:14px 16px">
+              <span class="badge-status" style="background:{{ report.get_status_color }}20; color:{{ report.get_status_color }}">{{ report.get_status_display }}</span>
+            </td>
+            <td style="padding:14px 16px">
+              <span class="badge-priority" style="background:{{ report.get_priority_color }}15; color:{{ report.get_priority_color }}">{{ report.get_priority_display }}</span>
+            </td>
+            <td style="padding:14px 16px; text-align:center">
+              {% if report.is_points_given %}
+              <span style="color:var(--green); font-weight:700; font-size:14px">+{{ report.points_awarded }}</span>
+              {% else %}—{% endif %}
+            </td>
+            <td style="padding:14px 16px; color:var(--gray-600); white-space:nowrap">{{ report.created_at|date:"d M Y" }}</td>
+            <td style="padding:14px 16px">
+              <a href="{% url 'report_detail' report.pk %}" style="color:var(--navy); font-size:12px; text-decoration:none; font-weight:600; white-space:nowrap">View →</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <i class="fas fa-clipboard-list d-block"></i>
+    <h4>No Reports Yet</h4>
+    <p>You haven't reported any civic issues yet. Start now and earn points!</p>
+    <a href="{% url 'submit_report' %}" class="btn-primary-civic mt-3"><i class="fas fa-plus-circle"></i> Submit Your First Report</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

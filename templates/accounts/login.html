@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% block title %}Citizen Login{% endblock %}
+
+{% block content %}
+<div style="min-height:80vh; display:flex; align-items:center; background:var(--off-white); padding:48px 0">
+  <div class="container px-4">
+    <div class="row justify-content-center">
+      <div class="col-lg-5 col-md-7">
+
+        <div style="text-align:center; margin-bottom:32px">
+          <div style="width:64px; height:64px; background:linear-gradient(135deg,var(--navy),var(--navy-mid)); border-radius:var(--radius); display:flex; align-items:center; justify-content:center; margin:0 auto 16px; font-size:28px; color:var(--gold)">
+            <i class="fas fa-city"></i>
+          </div>
+          <h2 style="font-family:'Playfair Display',serif; margin-bottom:6px">Welcome Back</h2>
+          <p style="color:var(--gray-600); font-size:14px">Login to your Tumakuru Civic Portal account</p>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-header">
+            <div style="display:flex; align-items:center; gap:10px">
+              <i class="fas fa-sign-in-alt" style="font-size:18px"></i>
+              <span style="font-weight:700">Citizen Login</span>
+            </div>
+          </div>
+          <div class="form-section-body">
+            <form method="post">
+              {% csrf_token %}
+              <div class="mb-3">
+                <label class="form-label"><i class="fas fa-user me-1 text-muted"></i> Username</label>
+                {% render_field form.username class="form-control" %}
+              </div>
+              <div class="mb-4">
+                <label class="form-label"><i class="fas fa-lock me-1 text-muted"></i> Password</label>
+                {% render_field form.password class="form-control" %}
+              </div>
+              <button type="submit" class="btn-primary-civic w-100" style="justify-content:center; border-radius:var(--radius-sm); padding:13px">
+                <i class="fas fa-sign-in-alt"></i> Login to Portal
+              </button>
+            </form>
+            <div style="text-align:center; margin-top:20px; font-size:14px; color:var(--gray-600)">
+              Don't have an account? <a href="{% url 'register' %}" style="color:var(--saffron); font-weight:600; text-decoration:none">Register as Citizen</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Info Card -->
+        <div style="margin-top:24px; background:white; border-radius:var(--radius); padding:20px; border:1px solid var(--gray-100); box-shadow:var(--shadow-sm)">
+          <div style="display:flex; gap:10px; align-items:flex-start">
+            <i class="fas fa-star" style="color:var(--gold); font-size:18px; margin-top:2px; flex-shrink:0"></i>
+            <div style="font-size:13px; color:var(--gray-600)">
+              <strong style="color:var(--gray-800)">Earn Civic Points!</strong> Login and report issues to earn 5 points each. Reach 100 points and get the <strong>Best Citizen Certificate</strong>.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Report Received — Tumakuru City Corporation</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background:#F0F2F5; }
+  .wrapper { max-width:600px; margin:0 auto; padding:24px 16px; }
+
+  /* Header */
+  .header { background:linear-gradient(135deg,#0D2137 0%,#1A3A5C 100%); border-radius:12px 12px 0 0; padding:32px 32px 24px; text-align:center; position:relative; overflow:hidden; }
+  .header::before { content:''; position:absolute; top:-40px; right:-40px; width:150px; height:150px; border-radius:50%; background:rgba(232,97,26,0.12); }
+  .header-logo { font-size:36px; margin-bottom:10px; }
+  .header-title { color:#E8C96B; font-size:20px; font-weight:700; letter-spacing:0.5px; }
+  .header-sub { color:rgba(255,255,255,0.65); font-size:12px; margin-top:4px; }
+  .tricolor { height:4px; background:linear-gradient(90deg,#E8611A 33.33%,#ffffff 33.33% 66.66%,#138808 66.66%); }
+
+  /* Body */
+  .card { background:white; padding:32px; }
+  .greeting { font-size:22px; font-weight:700; color:#0D2137; margin-bottom:6px; }
+  .subtext { font-size:14px; color:#5A6478; line-height:1.6; margin-bottom:24px; }
+
+  /* Report box */
+  .report-box { background:linear-gradient(135deg,#0D2137,#1A3A5C); border-radius:10px; padding:20px 24px; margin-bottom:24px; }
+  .report-id-label { font-size:11px; color:rgba(255,255,255,.55); text-transform:uppercase; letter-spacing:1.5px; }
+  .report-id { font-size:22px; font-weight:800; color:#E8C96B; font-family:monospace; margin:4px 0 16px; }
+  .report-meta { display:flex; gap:16px; flex-wrap:wrap; }
+  .meta-item { background:rgba(255,255,255,.08); border-radius:8px; padding:8px 14px; }
+  .meta-label { font-size:10px; color:rgba(255,255,255,.5); text-transform:uppercase; letter-spacing:.5px; }
+  .meta-value { font-size:13px; font-weight:700; color:white; margin-top:2px; }
+
+  /* Points earned */
+  .points-banner { background:linear-gradient(135deg,#E8611A,#F47A3A); border-radius:10px; padding:18px 24px; margin-bottom:24px; display:flex; align-items:center; gap:16px; }
+  .points-star { font-size:40px; line-height:1; }
+  .points-text-main { font-size:18px; font-weight:800; color:white; }
+  .points-text-sub { font-size:13px; color:rgba(255,255,255,.85); margin-top:2px; }
+
+  /* Progress bar */
+  .progress-section { background:#F7F8FA; border-radius:10px; padding:18px 20px; margin-bottom:24px; border:1px solid #E4E6EB; }
+  .progress-title { font-size:13px; font-weight:700; color:#0D2137; margin-bottom:10px; }
+  .progress-bar-wrap { background:#E4E6EB; border-radius:6px; height:12px; overflow:hidden; margin-bottom:8px; }
+  .progress-bar-fill { height:100%; border-radius:6px; background:linear-gradient(90deg,#C9A84C,#E8C96B); }
+  .progress-labels { display:flex; justify-content:space-between; font-size:11px; color:#5A6478; }
+
+  /* Steps */
+  .steps-title { font-size:14px; font-weight:700; color:#0D2137; margin-bottom:14px; }
+  .step { display:flex; gap:12px; align-items:flex-start; margin-bottom:12px; }
+  .step-num { width:26px; height:26px; border-radius:50%; background:#0D2137; color:white; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+  .step-text { font-size:13px; color:#5A6478; line-height:1.5; }
+  .step-text strong { color:#0D2137; }
+
+  /* CTA button */
+  .cta-wrap { text-align:center; margin:24px 0; }
+  .cta-btn { display:inline-block; background:linear-gradient(135deg,#E8611A,#F47A3A); color:white; text-decoration:none; padding:14px 36px; border-radius:30px; font-weight:700; font-size:15px; }
+
+  /* Divider */
+  .divider { height:1px; background:#E4E6EB; margin:24px 0; }
+
+  /* Emergency strip */
+  .emergency-strip { background:#FFF5F5; border:1px solid #FFD5D5; border-radius:10px; padding:14px 18px; margin-bottom:24px; }
+  .emergency-title { font-size:12px; font-weight:700; color:#C0392B; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .emergency-numbers { display:flex; gap:16px; flex-wrap:wrap; }
+  .em-num { font-size:13px; color:#5A6478; }
+  .em-num strong { color:#C0392B; font-size:15px; font-weight:800; }
+
+  /* Footer */
+  .footer { background:#0D2137; border-radius:0 0 12px 12px; padding:20px 32px; text-align:center; }
+  .footer-text { font-size:12px; color:rgba(255,255,255,.5); line-height:1.7; }
+  .footer-text a { color:#E8C96B; text-decoration:none; }
+  .social-strip { display:flex; justify-content:center; gap:12px; margin-top:12px; }
+  .social-btn { display:inline-block; width:32px; height:32px; border-radius:50%; background:rgba(255,255,255,.1); color:rgba(255,255,255,.7); text-align:center; line-height:32px; font-size:13px; text-decoration:none; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-logo">🏛️</div>
+    <div class="header-title">Tumakuru City Corporation</div>
+    <div class="header-sub">ತುಮಕೂರು ನಗರ ನಿಗಮ &nbsp;·&nbsp; Government of Karnataka</div>
+  </div>
+  <div class="tricolor"></div>
+
+  <!-- BODY CARD -->
+  <div class="card">
+
+    <div class="greeting">Dear {{ citizen_name }},</div>
+    <div class="subtext">
+      Thank you for being an active citizen of Tumakuru! Your civic issue report has been successfully received by the Tumakuru City Corporation. We appreciate your effort in making Tumakuru a better city for everyone. 🙏
+    </div>
+
+    <!-- REPORT DETAILS BOX -->
+    <div class="report-box">
+      <div class="report-id-label">Your Report ID</div>
+      <div class="report-id">{{ report_id }}</div>
+      <div class="report-meta">
+        <div class="meta-item">
+          <div class="meta-label">Issue</div>
+          <div class="meta-value">{{ report_title }}</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Category</div>
+          <div class="meta-value">{{ category }}</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Ward</div>
+          <div class="meta-value">Ward {{ ward }}</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Status</div>
+          <div class="meta-value">⏳ Pending Review</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- POINTS EARNED -->
+    <div class="points-banner">
+      <div class="points-star">⭐</div>
+      <div>
+        <div class="points-text-main">You earned +{{ points_earned }} Civic Points!</div>
+        <div class="points-text-sub">Total balance: {{ total_points }} points &nbsp;·&nbsp; {{ points_to_cert }} more for Best Citizen Certificate</div>
+      </div>
+    </div>
+
+    <!-- PROGRESS BAR -->
+    <div class="progress-section">
+      <div class="progress-title">🏆 Progress to Best Citizen Certificate</div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" style="width:{{ progress_percent }}%"></div>
+      </div>
+      <div class="progress-labels">
+        <span>{{ total_points }} Points</span>
+        <span>100 Points = Certificate 🎖️</span>
+      </div>
+    </div>
+
+    <!-- WHAT HAPPENS NEXT -->
+    <div class="steps-title">📋 What happens next?</div>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text"><strong>Review (1–2 days):</strong> Our team will review your report and verify the details provided.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text"><strong>Acknowledgement:</strong> Your report will be assigned to the relevant department with a timeline.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text"><strong>Resolution:</strong> Field team will address the issue and update the status. You can track it anytime.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-text"><strong>Closure:</strong> You will be notified when the issue is marked Resolved.</div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-wrap">
+      <a href="{{ dashboard_url }}" class="cta-btn">📊 Track Your Report</a>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- EMERGENCY STRIP -->
+    <div class="emergency-strip">
+      <div class="emergency-title">🚨 Emergency Helplines — Tumakuru</div>
+      <div class="emergency-numbers">
+        <div class="em-num">Emergency <strong>112</strong></div>
+        <div class="em-num">Ambulance <strong>108</strong></div>
+        <div class="em-num">Fire <strong>101</strong></div>
+        <div class="em-num">Police <strong>100</strong></div>
+        <div class="em-num">BESCOM <strong>1912</strong></div>
+      </div>
+    </div>
+
+    <div style="font-size:12px; color:#9AA5B4; text-align:center; line-height:1.7">
+      This is an automated message from Tumakuru City Corporation.<br>
+      Please do not reply to this email. For queries call: <strong>0816-2272233</strong>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-text">
+      <strong style="color:rgba(255,255,255,.8)">Tumakuru City Corporation</strong><br>
+      B.H. Road, Tumakuru – 572 101, Karnataka, India<br>
+      <a href="mailto:civic@tumakuru.gov.in">civic@tumakuru.gov.in</a> &nbsp;·&nbsp; Helpline: 1800-425-0006<br><br>
+      © 2025 Tumakuru City Corporation. All Rights Reserved.
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

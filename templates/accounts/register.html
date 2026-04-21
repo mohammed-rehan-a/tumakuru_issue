@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% block title %}Register as Citizen{% endblock %}
+
+{% block content %}
+<div style="background:var(--off-white); padding:48px 0">
+  <div class="container px-4">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+
+        <div style="text-align:center; margin-bottom:32px">
+          <div style="width:64px; height:64px; background:linear-gradient(135deg,var(--navy),var(--navy-mid)); border-radius:var(--radius); display:flex; align-items:center; justify-content:center; margin:0 auto 16px; font-size:28px; color:var(--gold)">
+            <i class="fas fa-user-plus"></i>
+          </div>
+          <h2 style="font-family:'Playfair Display',serif; margin-bottom:6px">Register as Citizen</h2>
+          <p style="color:var(--gray-600); font-size:14px; max-width:400px; margin:0 auto">Join the Tumakuru Civic Portal and start making your city better today.</p>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-header">
+            <div style="display:flex; align-items:center; gap:10px">
+              <i class="fas fa-id-card" style="font-size:18px"></i>
+              <div>
+                <div style="font-weight:700">Citizen Registration Form</div>
+                <div style="font-size:12px; opacity:.65">All fields marked * are required</div>
+              </div>
+            </div>
+          </div>
+          <div class="form-section-body">
+            <form method="post">
+              {% csrf_token %}
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">First Name <span class="text-danger">*</span></label>
+                  {% render_field form.first_name class="form-control" %}
+                  {% if form.first_name.errors %}<div class="text-danger small mt-1">{{ form.first_name.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Last Name <span class="text-danger">*</span></label>
+                  {% render_field form.last_name class="form-control" %}
+                  {% if form.last_name.errors %}<div class="text-danger small mt-1">{{ form.last_name.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Username <span class="text-danger">*</span></label>
+                  {% render_field form.username class="form-control" %}
+                  {% if form.username.errors %}<div class="text-danger small mt-1">{{ form.username.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Email Address <span class="text-danger">*</span></label>
+                  {% render_field form.email class="form-control" %}
+                  {% if form.email.errors %}<div class="text-danger small mt-1">{{ form.email.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Mobile Number <span class="text-danger">*</span></label>
+                  {% render_field form.phone class="form-control" %}
+                  {% if form.phone.errors %}<div class="text-danger small mt-1">{{ form.phone.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Ward Number <span class="text-danger">*</span></label>
+                  {% render_field form.ward_number class="form-select" %}
+                  {% if form.ward_number.errors %}<div class="text-danger small mt-1">{{ form.ward_number.errors }}</div>{% endif %}
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Residential Address <span class="text-danger">*</span></label>
+                  {% render_field form.address class="form-control" rows="2" %}
+                  {% if form.address.errors %}<div class="text-danger small mt-1">{{ form.address.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Aadhaar Last 4 Digits <span class="text-muted small">(optional)</span></label>
+                  {% render_field form.aadhaar_last4 class="form-control" %}
+                  <div class="form-text">Used only for identity verification by the corporation.</div>
+                </div>
+                <div class="col-md-6"></div>
+                <div class="col-md-6">
+                  <label class="form-label">Password <span class="text-danger">*</span></label>
+                  {% render_field form.password1 class="form-control" placeholder="Choose a password" %}
+                  {% if form.password1.errors %}<div class="text-danger small mt-1">{{ form.password1.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Confirm Password <span class="text-danger">*</span></label>
+                  {% render_field form.password2 class="form-control" placeholder="Repeat your password" %}
+                  {% if form.password2.errors %}<div class="text-danger small mt-1">{{ form.password2.errors }}</div>{% endif %}
+                </div>
+
+                <div class="col-12">
+                  <div style="background:var(--gray-50); border-radius:var(--radius-sm); padding:14px 16px; font-size:13px; color:var(--gray-600); border:1px solid var(--gray-100)">
+                    <i class="fas fa-shield-alt me-2 text-navy"></i>
+                    By registering, you agree that the information provided is accurate. Your data will be used only for civic management purposes by Tumakuru City Corporation.
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <button type="submit" class="btn-primary-civic w-100" style="justify-content:center; border-radius:var(--radius-sm); padding:14px">
+                    <i class="fas fa-user-check"></i> Create Citizen Account
+                  </button>
+                </div>
+              </div>
+            </form>
+            <div style="text-align:center; margin-top:20px; font-size:14px; color:var(--gray-600)">
+              Already have an account? <a href="{% url 'login' %}" style="color:var(--saffron); font-weight:600; text-decoration:none">Login here</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

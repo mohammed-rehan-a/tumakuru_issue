@@ -1,0 +1,504 @@
+{% extends 'base.html' %}
+{% block title %}Emergency Contacts{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── Emergency Page Styles ─────────────────────────────── */
+.sos-banner {
+  background: linear-gradient(135deg, #8B0000 0%, #C0392B 50%, #E74C3C 100%);
+  padding: 20px 0;
+  border-bottom: 4px solid #FFD700;
+}
+.sos-pulse {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 64px; height: 64px; border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  border: 3px solid rgba(255,255,255,0.4);
+  font-size: 28px; color: white; flex-shrink: 0;
+  animation: sosPulse 1.8s infinite;
+}
+@keyframes sosPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.4); }
+  50%       { box-shadow: 0 0 0 14px rgba(255,255,255,0); }
+}
+.quick-dial-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 14px;
+  margin-bottom: 40px;
+}
+.quick-dial-btn {
+  background: white;
+  border-radius: 14px;
+  padding: 20px 12px;
+  text-align: center;
+  text-decoration: none;
+  border: 2px solid var(--gray-100);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  cursor: pointer;
+}
+.quick-dial-btn:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: transparent;
+}
+.quick-dial-btn .qd-icon {
+  width: 52px; height: 52px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; color: white; flex-shrink: 0;
+  margin-bottom: 4px;
+}
+.quick-dial-btn .qd-name {
+  font-weight: 700; font-size: 13px; color: var(--gray-800); line-height: 1.2;
+}
+.quick-dial-btn .qd-number {
+  font-size: 18px; font-weight: 800; font-family: 'Playfair Display', serif;
+  line-height: 1;
+}
+.contact-section-card {
+  background: white;
+  border-radius: var(--radius);
+  border: 1px solid var(--gray-100);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+.contact-section-header {
+  padding: 16px 22px;
+  display: flex; align-items: center; gap: 12px;
+  border-bottom: 1px solid var(--gray-100);
+}
+.contact-section-header .section-icon {
+  width: 40px; height: 40px; border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: white; flex-shrink: 0;
+}
+.contact-section-header .section-title {
+  font-weight: 700; font-size: 15px; color: var(--navy); line-height: 1.2;
+}
+.contact-section-header .section-sub {
+  font-size: 11px; color: var(--gray-600); margin-top: 2px;
+}
+.contact-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--gray-50);
+  transition: var(--transition);
+}
+.contact-row:last-child { border-bottom: none; }
+.contact-row:hover { background: var(--gray-50); }
+.contact-row .c-icon {
+  width: 38px; height: 38px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; color: white; flex-shrink: 0;
+}
+.contact-row .c-info { flex: 1; min-width: 0; }
+.contact-row .c-name {
+  font-weight: 600; font-size: 14px; color: var(--gray-800);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.contact-row .c-desc {
+  font-size: 11px; color: var(--gray-600); margin-top: 2px;
+}
+.contact-row .c-number {
+  font-weight: 800; font-size: 15px; color: var(--navy);
+  text-decoration: none; white-space: nowrap; font-family: 'Playfair Display', serif;
+}
+.contact-row .c-number:hover { color: var(--saffron); }
+.call-btn {
+  background: var(--green);
+  color: white; border: none; border-radius: 20px;
+  padding: 6px 14px; font-size: 12px; font-weight: 700;
+  text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
+  transition: var(--transition); flex-shrink: 0;
+}
+.call-btn:hover { background: #0e6b06; color: white; transform: scale(1.05); }
+.availability-badge {
+  display: inline-block;
+  padding: 2px 8px; border-radius: 10px;
+  font-size: 10px; font-weight: 700; margin-top: 3px;
+}
+.avail-24 { background: #EDFAEE; color: var(--green); }
+.avail-day { background: #FFF8EC; color: #E67E22; }
+.ticker-wrap {
+  background: #8B0000;
+  overflow: hidden; white-space: nowrap;
+  padding: 8px 0; border-bottom: 2px solid #FFD700;
+}
+.ticker-content {
+  display: inline-block;
+  animation: ticker 30s linear infinite;
+  color: #FFD700; font-size: 13px; font-weight: 600;
+}
+@keyframes ticker {
+  0%   { transform: translateX(100vw); }
+  100% { transform: translateX(-100%); }
+}
+/* Mobile optimizations */
+@media (max-width: 576px) {
+  .quick-dial-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .quick-dial-btn { padding: 14px 8px; }
+  .quick-dial-btn .qd-icon { width: 42px; height: 42px; font-size: 18px; }
+  .quick-dial-btn .qd-number { font-size: 15px; }
+  .quick-dial-btn .qd-name { font-size: 11px; }
+  .contact-row { padding: 12px 14px; gap: 10px; }
+  .c-number { font-size: 13px !important; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- SOS TICKER -->
+<div class="ticker-wrap">
+  <span class="ticker-content">
+    🚨 EMERGENCY? CALL 112 IMMEDIATELY &nbsp;·&nbsp;
+    🚒 FIRE: 101 &nbsp;·&nbsp;
+    🚑 AMBULANCE: 108 &nbsp;·&nbsp;
+    👮 POLICE: 100 &nbsp;·&nbsp;
+    🏥 TUMAKURU DISTRICT HOSPITAL: 0816-2272326 &nbsp;·&nbsp;
+    ⚡ BESCOM POWER FAILURE: 1912 &nbsp;·&nbsp;
+    💧 WATER SUPPLY: 1800-425-0006 &nbsp;·&nbsp;
+    🚨 EMERGENCY? CALL 112 IMMEDIATELY
+  </span>
+</div>
+
+<!-- SOS BANNER -->
+<div class="sos-banner">
+  <div class="container px-4">
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+      <div class="sos-pulse"><i class="fas fa-exclamation-triangle"></i></div>
+      <div style="flex:1">
+        <div style="font-family:'Playfair Display',serif; font-size:1.6rem; font-weight:700; color:white; line-height:1.1">Emergency Helpline Directory</div>
+        <div style="color:rgba(255,255,255,.8); font-size:13px; margin-top:4px">Tumakuru City · Karnataka · 24×7 Emergency Services</div>
+      </div>
+      <!-- ONE-TAP SOS -->
+      <a href="tel:112" style="background:#FFD700; color:#7B0000; border:none; border-radius:30px; padding:14px 28px; font-weight:900; font-size:20px; text-decoration:none; display:inline-flex; align-items:center; gap:8px; box-shadow:0 4px 20px rgba(0,0,0,0.3); flex-shrink:0;">
+        <i class="fas fa-phone-alt"></i> CALL 112
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="container px-4 py-4">
+
+  <!-- ── QUICK DIAL ─────────────────────────────────────── -->
+  <div class="mb-2">
+    <div style="font-size:12px; font-weight:700; color:var(--saffron); text-transform:uppercase; letter-spacing:2px; margin-bottom:14px">
+      <i class="fas fa-bolt me-1"></i> Quick Dial — Tap to Call
+    </div>
+  </div>
+
+  <div class="quick-dial-grid">
+
+    <a href="tel:112" class="quick-dial-btn" style="border-color:#E74C3C">
+      <div class="qd-icon" style="background:#E74C3C"><i class="fas fa-sos"></i></div>
+      <div class="qd-name">National Emergency</div>
+      <div class="qd-number" style="color:#E74C3C">112</div>
+    </a>
+
+    <a href="tel:108" class="quick-dial-btn" style="border-color:#E74C3C">
+      <div class="qd-icon" style="background:#E74C3C"><i class="fas fa-ambulance"></i></div>
+      <div class="qd-name">Ambulance</div>
+      <div class="qd-number" style="color:#E74C3C">108</div>
+    </a>
+
+    <a href="tel:101" class="quick-dial-btn" style="border-color:#E67E22">
+      <div class="qd-icon" style="background:#E67E22"><i class="fas fa-fire-extinguisher"></i></div>
+      <div class="qd-name">Fire Service</div>
+      <div class="qd-number" style="color:#E67E22">101</div>
+    </a>
+
+    <a href="tel:100" class="quick-dial-btn" style="border-color:#2980B9">
+      <div class="qd-icon" style="background:#2980B9"><i class="fas fa-shield-alt"></i></div>
+      <div class="qd-name">Police</div>
+      <div class="qd-number" style="color:#2980B9">100</div>
+    </a>
+
+    <a href="tel:1912" class="quick-dial-btn" style="border-color:#F39C12">
+      <div class="qd-icon" style="background:#F39C12"><i class="fas fa-bolt"></i></div>
+      <div class="qd-name">BESCOM Power</div>
+      <div class="qd-number" style="color:#F39C12">1912</div>
+    </a>
+
+    <a href="tel:1800425006" class="quick-dial-btn" style="border-color:#2471A3">
+      <div class="qd-icon" style="background:#2471A3"><i class="fas fa-tint"></i></div>
+      <div class="qd-name">Water Supply</div>
+      <div class="qd-number" style="color:#2471A3; font-size:13px">1800-425-0006</div>
+    </a>
+
+    <a href="tel:1073" class="quick-dial-btn" style="border-color:#117A65">
+      <div class="qd-icon" style="background:#117A65"><i class="fas fa-road"></i></div>
+      <div class="qd-name">Road Accident</div>
+      <div class="qd-number" style="color:#117A65">1073</div>
+    </a>
+
+    <a href="tel:1098" class="quick-dial-btn" style="border-color:#8E44AD">
+      <div class="qd-icon" style="background:#8E44AD"><i class="fas fa-child"></i></div>
+      <div class="qd-name">Child Helpline</div>
+      <div class="qd-number" style="color:#8E44AD">1098</div>
+    </a>
+
+    <a href="tel:181" class="quick-dial-btn" style="border-color:#C0392B">
+      <div class="qd-icon" style="background:#C0392B"><i class="fas fa-female"></i></div>
+      <div class="qd-name">Women Helpline</div>
+      <div class="qd-number" style="color:#C0392B">181</div>
+    </a>
+
+    <a href="tel:1916" class="quick-dial-btn" style="border-color:#27AE60">
+      <div class="qd-icon" style="background:#27AE60"><i class="fas fa-leaf"></i></div>
+      <div class="qd-name">Forest / Poaching</div>
+      <div class="qd-number" style="color:#27AE60">1916</div>
+    </a>
+
+    <a href="tel:103" class="quick-dial-btn" style="border-color:#E74C3C">
+      <div class="qd-icon" style="background:#E74C3C"><i class="fas fa-tint"></i></div>
+      <div class="qd-name">Blood Bank</div>
+      <div class="qd-number" style="color:#E74C3C">104</div>
+    </a>
+
+    <a href="tel:14567" class="quick-dial-btn" style="border-color:#7D6608">
+      <div class="qd-icon" style="background:#7D6608"><i class="fas fa-user-tie"></i></div>
+      <div class="qd-name">Senior Citizen</div>
+      <div class="qd-number" style="color:#7D6608">14567</div>
+    </a>
+
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-6">
+
+      <!-- ── POLICE & LAW ───────────────────────────────── -->
+      <div class="contact-section-card">
+        <div class="contact-section-header">
+          <div class="section-icon" style="background:#1A5276"><i class="fas fa-shield-alt"></i></div>
+          <div>
+            <div class="section-title">Police & Law Enforcement</div>
+            <div class="section-sub">Tumakuru District Police</div>
+          </div>
+        </div>
+
+        {% for c in police_contacts %}
+        <div class="contact-row">
+          <div class="c-icon" style="background:{{ c.color }}"><i class="{{ c.icon }}"></i></div>
+          <div class="c-info">
+            <div class="c-name">{{ c.name }}</div>
+            <div class="c-desc">{{ c.desc }}</div>
+            <span class="availability-badge {{ c.avail_class }}">{{ c.avail }}</span>
+          </div>
+          <a href="tel:{{ c.number }}" class="c-number">{{ c.number }}</a>
+          <a href="tel:{{ c.number }}" class="call-btn d-none d-sm-inline-flex"><i class="fas fa-phone"></i> Call</a>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- ── MEDICAL & HEALTH ───────────────────────────── -->
+      <div class="contact-section-card">
+        <div class="contact-section-header">
+          <div class="section-icon" style="background:#C0392B"><i class="fas fa-heartbeat"></i></div>
+          <div>
+            <div class="section-title">Medical & Health Services</div>
+            <div class="section-sub">Hospitals, Ambulance & Blood Banks</div>
+          </div>
+        </div>
+
+        {% for c in medical_contacts %}
+        <div class="contact-row">
+          <div class="c-icon" style="background:{{ c.color }}"><i class="{{ c.icon }}"></i></div>
+          <div class="c-info">
+            <div class="c-name">{{ c.name }}</div>
+            <div class="c-desc">{{ c.desc }}</div>
+            <span class="availability-badge {{ c.avail_class }}">{{ c.avail }}</span>
+          </div>
+          <a href="tel:{{ c.number }}" class="c-number">{{ c.number }}</a>
+          <a href="tel:{{ c.number }}" class="call-btn d-none d-sm-inline-flex"><i class="fas fa-phone"></i> Call</a>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- ── FIRE ──────────────────────────────────────── -->
+      <div class="contact-section-card">
+        <div class="contact-section-header">
+          <div class="section-icon" style="background:#E67E22"><i class="fas fa-fire"></i></div>
+          <div>
+            <div class="section-title">Fire & Rescue Services</div>
+            <div class="section-sub">Tumakuru Fire Station</div>
+          </div>
+        </div>
+        {% for c in fire_contacts %}
+        <div class="contact-row">
+          <div class="c-icon" style="background:{{ c.color }}"><i class="{{ c.icon }}"></i></div>
+          <div class="c-info">
+            <div class="c-name">{{ c.name }}</div>
+            <div class="c-desc">{{ c.desc }}</div>
+            <span class="availability-badge {{ c.avail_class }}">{{ c.avail }}</span>
+          </div>
+          <a href="tel:{{ c.number }}" class="c-number">{{ c.number }}</a>
+          <a href="tel:{{ c.number }}" class="call-btn d-none d-sm-inline-flex"><i class="fas fa-phone"></i> Call</a>
+        </div>
+        {% endfor %}
+      </div>
+
+    </div>
+
+    <div class="col-lg-6">
+
+      <!-- ── BESCOM / ELECTRICITY ──────────────────────── -->
+      <div class="contact-section-card">
+        <div class="contact-section-header">
+          <div class="section-icon" style="background:#F39C12"><i class="fas fa-bolt"></i></div>
+          <div>
+            <div class="section-title">BESCOM — Electricity</div>
+            <div class="section-sub">Bangalore Electricity Supply Company</div>
+          </div>
+        </div>
+        {% for c in bescom_contacts %}
+        <div class="contact-row">
+          <div class="c-icon" style="background:{{ c.color }}"><i class="{{ c.icon }}"></i></div>
+          <div class="c-info">
+            <div class="c-name">{{ c.name }}</div>
+            <div class="c-desc">{{ c.desc }}</div>
+            <span class="availability-badge {{ c.avail_class }}">{{ c.avail }}</span>
+          </div>
+          <a href="tel:{{ c.number }}" class="c-number">{{ c.number }}</a>
+          <a href="tel:{{ c.number }}" class="call-btn d-none d-sm-inline-flex"><i class="fas fa-phone"></i> Call</a>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- ── TRAFFIC ────────────────────────────────────── -->
+      <div class="contact-section-card">
+        <div class="contact-section-header">
+          <div class="section-icon" style="background:#2980B9"><i class="fas fa-traffic-light"></i></div>
+          <div>
+            <div class="section-title">Traffic Police</div>
+            <div class="section-sub">Tumakuru Traffic Control</div>
+          </div>
+        </div>
+        {% for c in traffic_contacts %}
+        <div class="contact-row">
+          <div class="c-icon" style="background:{{ c.color }}"><i class="{{ c.icon }}"></i></div>
+          <div class="c-info">
+            <div class="c-name">{{ c.name }}</div>
+            <div class="c-desc">{{ c.desc }}</div>
+            <span class="availability-badge {{ c.avail_class }}">{{ c.avail }}</span>
+          </div>
+          <a href="tel:{{ c.number }}" class="c-number">{{ c.number }}</a>
+          <a href="tel:{{ c.number }}" class="call-btn d-none d-sm-inline-flex"><i class="fas fa-phone"></i> Call</a>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- ── FOREST / WILDLIFE ──────────────────────────── -->
+      <div class="contact-section-card">
+        <div class="contact-section-header">
+          <div class="section-icon" style="background:#1E8449"><i class="fas fa-tree"></i></div>
+          <div>
+            <div class="section-title">Forest & Wildlife</div>
+            <div class="section-sub">Karnataka Forest Department</div>
+          </div>
+        </div>
+        {% for c in forest_contacts %}
+        <div class="contact-row">
+          <div class="c-icon" style="background:{{ c.color }}"><i class="{{ c.icon }}"></i></div>
+          <div class="c-info">
+            <div class="c-name">{{ c.name }}</div>
+            <div class="c-desc">{{ c.desc }}</div>
+            <span class="availability-badge {{ c.avail_class }}">{{ c.avail }}</span>
+          </div>
+          <a href="tel:{{ c.number }}" class="c-number">{{ c.number }}</a>
+          <a href="tel:{{ c.number }}" class="call-btn d-none d-sm-inline-flex"><i class="fas fa-phone"></i> Call</a>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- ── WATER & CIVIC ──────────────────────────────── -->
+      <div class="contact-section-card">
+        <div class="contact-section-header">
+          <div class="section-icon" style="background:#2471A3"><i class="fas fa-tint"></i></div>
+          <div>
+            <div class="section-title">Water Supply & Civic</div>
+            <div class="section-sub">Tumakuru City Corporation Services</div>
+          </div>
+        </div>
+        {% for c in water_contacts %}
+        <div class="contact-row">
+          <div class="c-icon" style="background:{{ c.color }}"><i class="{{ c.icon }}"></i></div>
+          <div class="c-info">
+            <div class="c-name">{{ c.name }}</div>
+            <div class="c-desc">{{ c.desc }}</div>
+            <span class="availability-badge {{ c.avail_class }}">{{ c.avail }}</span>
+          </div>
+          <a href="tel:{{ c.number }}" class="c-number">{{ c.number }}</a>
+          <a href="tel:{{ c.number }}" class="call-btn d-none d-sm-inline-flex"><i class="fas fa-phone"></i> Call</a>
+        </div>
+        {% endfor %}
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── GOVERNMENT & ADMINISTRATION ───────────────────── -->
+  <div class="contact-section-card">
+    <div class="contact-section-header">
+      <div class="section-icon" style="background:var(--navy)"><i class="fas fa-landmark"></i></div>
+      <div>
+        <div class="section-title">Government & Administrative Offices</div>
+        <div class="section-sub">District Administration, Revenue, Social Services — Tumakuru</div>
+      </div>
+    </div>
+    <div class="row g-0">
+      {% for c in govt_contacts %}
+      <div class="col-md-6">
+        <div class="contact-row" style="{% if forloop.counter|divisibleby:2 %}border-left:1px solid var(--gray-50){% endif %}">
+          <div class="c-icon" style="background:{{ c.color }}"><i class="{{ c.icon }}"></i></div>
+          <div class="c-info">
+            <div class="c-name">{{ c.name }}</div>
+            <div class="c-desc">{{ c.desc }}</div>
+            <span class="availability-badge {{ c.avail_class }}">{{ c.avail }}</span>
+          </div>
+          <a href="tel:{{ c.number }}" class="c-number">{{ c.number }}</a>
+          <a href="tel:{{ c.number }}" class="call-btn d-none d-sm-inline-flex"><i class="fas fa-phone"></i> Call</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ── SOCIAL HELPLINES ──────────────────────────────── -->
+  <div class="contact-section-card">
+    <div class="contact-section-header">
+      <div class="section-icon" style="background:#7D3C98"><i class="fas fa-hands-helping"></i></div>
+      <div>
+        <div class="section-title">Social & Special Helplines</div>
+        <div class="section-sub">National Helplines — Available Across Karnataka</div>
+      </div>
+    </div>
+    <div class="row g-0">
+      {% for c in social_contacts %}
+      <div class="col-md-6">
+        <div class="contact-row" style="{% if forloop.counter|divisibleby:2 %}border-left:1px solid var(--gray-50){% endif %}">
+          <div class="c-icon" style="background:{{ c.color }}"><i class="{{ c.icon }}"></i></div>
+          <div class="c-info">
+            <div class="c-name">{{ c.name }}</div>
+            <div class="c-desc">{{ c.desc }}</div>
+            <span class="availability-badge {{ c.avail_class }}">{{ c.avail }}</span>
+          </div>
+          <a href="tel:{{ c.number }}" class="c-number">{{ c.number }}</a>
+          <a href="tel:{{ c.number }}" class="call-btn d-none d-sm-inline-flex"><i class="fas fa-phone"></i> Call</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ── DISCLAIMER ────────────────────────────────────── -->
+  <div style="background:#FFFBEC; border:1px solid #F9CA56; border-radius:var(--radius); padding:16px 20px; margin-top:8px; font-size:13px; color:#7D6608;">
+    <i class="fas fa-info-circle me-2"></i>
+    <strong>Note:</strong> All numbers listed are official government and civic helplines. Numbers starting with 1800 are toll-free. For life-threatening emergencies always call <strong>112</strong> first. Numbers may change — verify from official government websites if in doubt.
+  </div>
+
+</div>
+{% endblock %}

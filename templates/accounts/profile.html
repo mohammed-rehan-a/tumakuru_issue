@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <div class="container px-4">
+    <nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li><li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li><li class="breadcrumb-item active">Profile</li></ol></nav>
+    <h1 class="mt-2">My Profile</h1>
+  </div>
+  <div class="page-hero-tricolor"></div>
+</div>
+
+<div class="container px-4 py-5">
+  <div class="row g-4">
+    <div class="col-lg-4">
+      <!-- Profile Card -->
+      <div class="detail-card mb-4">
+        <div style="background:linear-gradient(135deg,var(--navy),var(--navy-mid)); padding:28px; text-align:center">
+          <div style="width:80px; height:80px; border-radius:50%; background:linear-gradient(135deg,var(--saffron),var(--gold)); color:white; font-size:28px; font-weight:700; display:flex; align-items:center; justify-content:center; margin:0 auto 14px; border:3px solid rgba(255,255,255,.2)">
+            {% if profile.profile_photo %}
+            <img src="{{ profile.profile_photo.url }}" style="width:100%; height:100%; border-radius:50%; object-fit:cover" alt="Profile">
+            {% else %}
+            {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+            {% endif %}
+          </div>
+          <div style="font-family:'Playfair Display',serif; font-size:1.3rem; font-weight:700; color:white">{{ request.user.get_full_name|default:request.user.username }}</div>
+          <div style="font-size:13px; color:rgba(255,255,255,.6); margin-top:4px">{{ profile.get_level }}</div>
+          {% if profile.is_verified %}
+          <div style="margin-top:10px; display:inline-flex; align-items:center; gap:6px; background:rgba(19,136,8,.2); border:1px solid rgba(19,136,8,.3); padding:4px 12px; border-radius:20px; font-size:12px; color:#4EC942">
+            <i class="fas fa-check-circle"></i> Verified Citizen
+          </div>
+          {% endif %}
+        </div>
+        <div class="detail-body p-0">
+          <div class="info-row px-4">
+            <div class="info-icon"><i class="fas fa-envelope"></i></div>
+            <div><span class="info-label">Email</span><span class="info-value">{{ request.user.email|default:"—" }}</span></div>
+          </div>
+          <div class="info-row px-4">
+            <div class="info-icon"><i class="fas fa-phone"></i></div>
+            <div><span class="info-label">Phone</span><span class="info-value">{{ profile.phone|default:"—" }}</span></div>
+          </div>
+          <div class="info-row px-4">
+            <div class="info-icon"><i class="fas fa-map"></i></div>
+            <div><span class="info-label">Ward</span><span class="info-value">{{ profile.ward_number|default:"—" }}</span></div>
+          </div>
+          <div class="info-row px-4">
+            <div class="info-icon"><i class="fas fa-calendar"></i></div>
+            <div><span class="info-label">Joined</span><span class="info-value">{{ profile.joined_date|date:"d M Y" }}</span></div>
+          </div>
+          <div class="info-row px-4">
+            <div class="info-icon" style="background:#FFF8EC; color:var(--gold)"><i class="fas fa-star"></i></div>
+            <div><span class="info-label">Civic Points</span><span class="info-value" style="font-size:1.3rem; font-weight:700; color:var(--navy); font-family:'Playfair Display',serif">{{ profile.points }}</span></div>
+          </div>
+          <div class="info-row px-4">
+            <div class="info-icon"><i class="fas fa-file-alt"></i></div>
+            <div><span class="info-label">Total Reports</span><span class="info-value">{{ profile.total_reports }}</span></div>
+          </div>
+          <div class="info-row px-4">
+            <div class="info-icon" style="background:#FFFBEC; color:var(--gold)"><i class="fas fa-certificate"></i></div>
+            <div><span class="info-label">Certificates</span><span class="info-value">{{ profile.certificates_earned }}</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Certificates -->
+      {% if certificates %}
+      <div class="detail-card">
+        <div class="detail-header"><h6 class="mb-0"><i class="fas fa-award me-2 text-gold"></i>My Certificates</h6></div>
+        <div class="detail-body p-0">
+          {% for cert in certificates %}
+          <div style="padding:14px 20px; border-bottom:1px solid var(--gray-50)">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px">
+              <div>
+                <div style="font-weight:700; font-size:13px; color:var(--gold)"><i class="fas fa-certificate me-1"></i>{{ cert.certificate_number }}</div>
+                <div style="font-size:11px; color:var(--gray-600)">{{ cert.issued_date|date:"d M Y" }} · {{ cert.milestone }} pts milestone</div>
+              </div>
+              <a href="{% url 'download_certificate' cert.pk %}" style="color:var(--navy); font-size:18px; text-decoration:none" title="Download PDF">
+                <i class="fas fa-download"></i>
+              </a>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="col-lg-8">
+      <!-- Edit Form -->
+      <div class="form-section">
+        <div class="form-section-header">
+          <div style="font-weight:700"><i class="fas fa-user-edit me-2"></i>Edit Profile</div>
+        </div>
+        <div class="form-section-body">
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">First Name</label>
+                {% render_field form.first_name class="form-control" %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Last Name</label>
+                {% render_field form.last_name class="form-control" %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Email</label>
+                {% render_field form.email class="form-control" %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Phone</label>
+                {% render_field form.phone class="form-control" %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Ward Number</label>
+                {% render_field form.ward_number class="form-select" %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Profile Photo</label>
+                {% render_field form.profile_photo class="form-control" %}
+              </div>
+              <div class="col-12">
+                <label class="form-label">Address</label>
+                {% render_field form.address class="form-control" rows="2" %}
+              </div>
+              <div class="col-12">
+                <label class="form-label">Bio</label>
+                {% render_field form.bio class="form-control" rows="2" %}
+              </div>
+              <div class="col-12">
+                <button type="submit" class="btn-primary-civic">
+                  <i class="fas fa-save"></i> Save Changes
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

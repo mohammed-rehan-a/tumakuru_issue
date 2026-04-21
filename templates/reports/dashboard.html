@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+{% block title %}My Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <div class="container px-4">
+    <nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li><li class="breadcrumb-item active">Dashboard</li></ol></nav>
+    <div class="d-flex align-items-center gap-3 mt-2">
+      <div style="width:56px;height:56px;background:linear-gradient(135deg,var(--saffron),var(--gold));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:white;flex-shrink:0;">
+        {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+      </div>
+      <div>
+        <h1>Welcome, {{ user.first_name|default:user.username }}!</h1>
+        <p style="opacity:.75;margin:0">{{ profile.get_level }} &nbsp;·&nbsp; Ward {{ profile.ward_number|default:"—" }} &nbsp;·&nbsp; Joined {{ profile.joined_date|date:"M Y" }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="page-hero-tricolor"></div>
+</div>
+
+<div class="container px-4 py-5">
+  <div class="row g-4">
+
+    <!-- SIDEBAR -->
+    <div class="col-lg-3">
+      <div class="sidebar-nav mb-4">
+        <div class="nav-header">
+          <div style="font-weight:700; margin-bottom:2px">Citizen Portal</div>
+          <div style="font-size:12px; opacity:.6">{{ user.get_full_name }}</div>
+        </div>
+        <a href="{% url 'dashboard' %}" class="nav-item-link active">
+          <div class="nav-icon"><i class="fas fa-tachometer-alt"></i></div> Dashboard
+        </a>
+        <a href="{% url 'submit_report' %}" class="nav-item-link">
+          <div class="nav-icon" style="background:#FFF3EC"><i class="fas fa-plus-circle" style="color:var(--saffron)"></i></div> Report Issue
+        </a>
+        <a href="{% url 'my_reports' %}" class="nav-item-link">
+          <div class="nav-icon"><i class="fas fa-file-alt"></i></div> My Reports
+        </a>
+        <a href="{% url 'leaderboard' %}" class="nav-item-link">
+          <div class="nav-icon" style="background:#FFFBEC"><i class="fas fa-trophy" style="color:var(--gold)"></i></div> Leaderboard
+        </a>
+        <a href="{% url 'profile' %}" class="nav-item-link">
+          <div class="nav-icon"><i class="fas fa-user-cog"></i></div> My Profile
+        </a>
+      </div>
+
+      <!-- Points Card in sidebar -->
+      <div class="points-card">
+        <div style="font-size:12px; color:rgba(255,255,255,.6); text-transform:uppercase; letter-spacing:.8px; margin-bottom:6px;">Civic Points</div>
+        <div class="points-number">{{ stats.points }}</div>
+        <div style="font-size:13px; color:rgba(255,255,255,.65); margin-top:4px; margin-bottom:16px;">{{ profile.get_level }}</div>
+
+        <div style="margin-bottom:6px; display:flex; justify-content:space-between; font-size:12px; color:rgba(255,255,255,.65)">
+          <span>Progress to Certificate</span>
+          <span>{{ stats.points|divisibleby:100 }}{% if points_needed == 0 %}Earned!{% else %}{{ stats.points }} / {{ points_threshold }}{% endif %}</span>
+        </div>
+        <div class="progress-civic mb-2">
+          <div class="progress-bar" id="progressBar" style="width:{{ progress }}%" data-target="{{ progress }}"></div>
+        </div>
+        <div style="font-size:12px; color:rgba(255,255,255,.5)">
+          {% if points_needed > 0 %}
+          <i class="fas fa-info-circle me-1"></i> {{ points_needed }} more points for next certificate
+          {% else %}
+          <i class="fas fa-check-circle me-1" style="color:var(--gold-light)"></i> Certificate milestone reached!
+          {% endif %}
+        </div>
+
+        {% if stats.certificates > 0 %}
+        <div style="margin-top:16px; padding-top:16px; border-top:1px solid rgba(255,255,255,.15)">
+          <div style="font-size:12px; color:rgba(255,255,255,.65); margin-bottom:6px">Certificates Earned</div>
+          <div style="font-family:'Playfair Display',serif; font-size:1.8rem; font-weight:700; color:var(--gold-light)">
+            {{ stats.certificates }} <i class="fas fa-certificate" style="font-size:1.2rem"></i>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="col-lg-9">
+
+      <!-- Stats Row -->
+      <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+          <div class="stat-card">
+            <div class="stat-accent" style="background:var(--navy)"></div>
+            <div class="stat-icon mb-2" style="background:#EEF2FF; color:var(--navy)"><i class="fas fa-file-alt"></i></div>
+            <div class="stat-number">{{ stats.total }}</div>
+            <div class="stat-label">Total Reports</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="stat-card">
+            <div class="stat-accent" style="background:#FFA500"></div>
+            <div class="stat-icon mb-2" style="background:#FFF8EC; color:#FFA500"><i class="fas fa-clock"></i></div>
+            <div class="stat-number">{{ stats.pending }}</div>
+            <div class="stat-label">Pending</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="stat-card">
+            <div class="stat-accent" style="background:#9C27B0"></div>
+            <div class="stat-icon mb-2" style="background:#F5EEFF; color:#9C27B0"><i class="fas fa-spinner"></i></div>
+            <div class="stat-number">{{ stats.in_progress }}</div>
+            <div class="stat-label">In Progress</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="stat-card">
+            <div class="stat-accent" style="background:var(--green)"></div>
+            <div class="stat-icon mb-2" style="background:#EDFAEE; color:var(--green)"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-number">{{ stats.resolved }}</div>
+            <div class="stat-label">Resolved</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Certificates Section -->
+      {% if certificates %}
+      <div class="mb-4">
+        <h5 class="mb-3"><i class="fas fa-certificate me-2 text-gold"></i>My Certificates</h5>
+        <div class="row g-3">
+          {% for cert in certificates %}
+          <div class="col-md-6">
+            <div class="certificate-card">
+              <div class="d-flex align-items-start justify-content-between">
+                <div>
+                  <span class="cert-icon"><i class="fas fa-award"></i></span>
+                  <div style="font-family:'Playfair Display',serif; font-size:1.3rem; font-weight:700; color:var(--gold-light); margin-bottom:4px">
+                    Best Citizen Certificate
+                  </div>
+                  <div class="cert-number">{{ cert.certificate_number }}</div>
+                  <div style="font-size:12px; color:rgba(255,255,255,.6); margin-top:6px">
+                    Milestone: {{ cert.milestone }} Points &nbsp;·&nbsp; {{ cert.issued_date|date:"d M Y" }}
+                  </div>
+                </div>
+                <div style="font-size:36px; opacity:.4; color:var(--gold)"><i class="fas fa-medal"></i></div>
+              </div>
+              <div class="d-flex gap-2 mt-4">
+                <a href="{% url 'certificate_detail' cert.pk %}" class="btn-gold" style="padding:8px 16px; font-size:13px; border-radius:8px">
+                  <i class="fas fa-eye"></i> View
+                </a>
+                <a href="{% url 'download_certificate' cert.pk %}" class="btn-navy" style="padding:8px 16px; font-size:13px; border-radius:8px; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2);">
+                  <i class="fas fa-download"></i> Download PDF
+                </a>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- CTA to report -->
+      <div style="background:linear-gradient(135deg,#FFF8F5,#FFF3EC); border:1px solid #FFD9C5; border-radius:var(--radius); padding:24px; margin-bottom:24px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap">
+        <div>
+          <div style="font-weight:700; font-size:15px; color:var(--navy)">See a Civic Issue? Report It Now!</div>
+          <div style="font-size:13px; color:var(--gray-600); margin-top:2px">Earn <strong style="color:var(--saffron)">{{ points_per_report }} points</strong> for every valid report you submit.</div>
+        </div>
+        <a href="{% url 'submit_report' %}" class="btn-primary-civic">
+          <i class="fas fa-plus-circle"></i> Report an Issue
+        </a>
+      </div>
+
+      <!-- Recent Reports -->
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0"><i class="fas fa-history me-2 text-muted"></i>Recent Reports</h5>
+        <a href="{% url 'my_reports' %}" style="font-size:13px; color:var(--saffron); text-decoration:none; font-weight:600">View All →</a>
+      </div>
+
+      {% if recent_reports %}
+      <div class="detail-card">
+        <div style="overflow-x:auto">
+          <table class="table table-hover mb-0" style="font-size:13px">
+            <thead style="background:var(--gray-50)">
+              <tr>
+                <th style="padding:12px 16px; font-weight:600; color:var(--gray-600); text-transform:uppercase; font-size:11px; letter-spacing:.5px">Report ID</th>
+                <th style="padding:12px 16px; font-weight:600; color:var(--gray-600); text-transform:uppercase; font-size:11px; letter-spacing:.5px">Issue</th>
+                <th style="padding:12px 16px; font-weight:600; color:var(--gray-600); text-transform:uppercase; font-size:11px; letter-spacing:.5px">Status</th>
+                <th style="padding:12px 16px; font-weight:600; color:var(--gray-600); text-transform:uppercase; font-size:11px; letter-spacing:.5px">Points</th>
+                <th style="padding:12px 16px; font-weight:600; color:var(--gray-600); text-transform:uppercase; font-size:11px; letter-spacing:.5px">Date</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for report in recent_reports %}
+              <tr>
+                <td style="padding:14px 16px; font-weight:700; color:var(--saffron); font-size:12px">{{ report.report_id }}</td>
+                <td style="padding:14px 16px">
+                  <div style="font-weight:600; color:var(--gray-800)">{{ report.title|truncatechars:40 }}</div>
+                  <div style="font-size:11px; color:var(--gray-600)">Ward {{ report.ward_number }}</div>
+                </td>
+                <td style="padding:14px 16px">
+                  <span class="badge-status" style="background:{{ report.get_status_color }}20; color:{{ report.get_status_color }}">
+                    {{ report.get_status_display }}
+                  </span>
+                </td>
+                <td style="padding:14px 16px">
+                  {% if report.is_points_given %}
+                  <span style="color:var(--green); font-weight:700"><i class="fas fa-plus me-1"></i>{{ report.points_awarded }}</span>
+                  {% else %}—{% endif %}
+                </td>
+                <td style="padding:14px 16px; color:var(--gray-600)">{{ report.created_at|date:"d M Y" }}</td>
+                <td style="padding:14px 16px">
+                  <a href="{% url 'report_detail' report.pk %}" style="color:var(--navy); font-size:12px; text-decoration:none; font-weight:600">View →</a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <i class="fas fa-file-medical d-block"></i>
+        <h5>No reports yet</h5>
+        <p>Start reporting civic issues to earn points and make a difference!</p>
+        <a href="{% url 'submit_report' %}" class="btn-primary-civic mt-2"><i class="fas fa-plus"></i> Submit First Report</a>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endblock %}

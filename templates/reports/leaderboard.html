@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% block title %}Leaderboard{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <div class="container px-4">
+    <nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li><li class="breadcrumb-item active">Leaderboard</li></ol></nav>
+    <h1 class="mt-2"><i class="fas fa-trophy me-3" style="color:var(--gold-light)"></i>Citizens Leaderboard</h1>
+    <p style="opacity:.75; margin:0">Recognizing the most active civic contributors of Tumakuru.</p>
+  </div>
+  <div class="page-hero-tricolor"></div>
+</div>
+
+<div class="container px-4 py-5">
+
+  <!-- Top 3 Podium -->
+  {% if citizens|length >= 3 %}
+  <div class="row justify-content-center mb-5 g-3">
+    <!-- 2nd Place -->
+    <div class="col-md-3 order-md-1 order-2 d-flex align-items-end">
+      <div style="background:white; border-radius:var(--radius); padding:24px; text-align:center; width:100%; box-shadow:var(--shadow-sm); border:1px solid var(--gray-100); border-top:4px solid #C0C0C0">
+        <div style="font-size:32px; margin-bottom:8px">🥈</div>
+        <div class="citizen-avatar-lg mx-auto mb-2" style="width:52px;height:52px;font-size:18px">
+          {{ citizens.1.user.first_name|first|upper }}{{ citizens.1.user.last_name|first|upper }}
+        </div>
+        <div style="font-weight:700; font-size:14px">{{ citizens.1.user.get_full_name|default:citizens.1.user.username }}</div>
+        <div style="font-size:12px; color:var(--gray-600)">Ward {{ citizens.1.ward_number|default:"—" }}</div>
+        <div style="font-family:'Playfair Display',serif; font-size:1.6rem; font-weight:700; color:#777; margin-top:8px">{{ citizens.1.points }}</div>
+        <div style="font-size:11px; color:var(--gray-600)">Civic Points</div>
+        <div style="font-size:12px; color:var(--gray-600); margin-top:4px">{{ citizens.1.total_reports }} reports</div>
+      </div>
+    </div>
+    <!-- 1st Place -->
+    <div class="col-md-3 order-md-2 order-1">
+      <div style="background:linear-gradient(135deg,#0A1628,#1A2B45); border-radius:var(--radius); padding:28px; text-align:center; box-shadow:var(--shadow-lg); border:2px solid var(--gold)">
+        <div style="font-size:36px; margin-bottom:8px">👑</div>
+        <div style="width:60px; height:60px; border-radius:50%; background:linear-gradient(135deg,var(--gold),var(--gold-light)); color:var(--navy); font-size:20px; font-weight:700; display:flex; align-items:center; justify-content:center; margin:0 auto 12px">
+          {{ citizens.0.user.first_name|first|upper }}{{ citizens.0.user.last_name|first|upper }}
+        </div>
+        <div style="font-weight:700; font-size:15px; color:white">{{ citizens.0.user.get_full_name|default:citizens.0.user.username }}</div>
+        <div style="font-size:12px; color:rgba(255,255,255,.6)">Ward {{ citizens.0.ward_number|default:"—" }}</div>
+        <div style="font-family:'Playfair Display',serif; font-size:2.2rem; font-weight:700; color:var(--gold-light); margin-top:10px">{{ citizens.0.points }}</div>
+        <div style="font-size:12px; color:rgba(255,255,255,.6)">Civic Points</div>
+        <div style="font-size:12px; color:rgba(255,255,255,.6); margin-top:4px">{{ citizens.0.total_reports }} reports</div>
+        <div style="margin-top:12px; background:rgba(201,168,76,.15); border:1px solid rgba(201,168,76,.3); border-radius:20px; padding:4px 12px; display:inline-block">
+          <span style="font-size:11px; color:var(--gold-light); font-weight:700">🏆 Best Citizen</span>
+        </div>
+      </div>
+    </div>
+    <!-- 3rd Place -->
+    <div class="col-md-3 order-md-3 order-3 d-flex align-items-end">
+      <div style="background:white; border-radius:var(--radius); padding:24px; text-align:center; width:100%; box-shadow:var(--shadow-sm); border:1px solid var(--gray-100); border-top:4px solid #CD7F32">
+        <div style="font-size:32px; margin-bottom:8px">🥉</div>
+        <div class="citizen-avatar-lg mx-auto mb-2" style="width:52px;height:52px;font-size:18px">
+          {{ citizens.2.user.first_name|first|upper }}{{ citizens.2.user.last_name|first|upper }}
+        </div>
+        <div style="font-weight:700; font-size:14px">{{ citizens.2.user.get_full_name|default:citizens.2.user.username }}</div>
+        <div style="font-size:12px; color:var(--gray-600)">Ward {{ citizens.2.ward_number|default:"—" }}</div>
+        <div style="font-family:'Playfair Display',serif; font-size:1.6rem; font-weight:700; color:#CD7F32; margin-top:8px">{{ citizens.2.points }}</div>
+        <div style="font-size:11px; color:var(--gray-600)">Civic Points</div>
+        <div style="font-size:12px; color:var(--gray-600); margin-top:4px">{{ citizens.2.total_reports }} reports</div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Full List -->
+  <div class="detail-card">
+    <div class="detail-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0"><i class="fas fa-list-ol me-2 text-saffron"></i>All Rankings</h5>
+      <span style="font-size:13px; color:var(--gray-600)">{{ citizens|length }} citizens ranked</span>
+    </div>
+    <div class="detail-body" style="padding:0">
+      {% for citizen in citizens %}
+      <div style="padding:16px 24px; border-bottom:1px solid var(--gray-50); display:flex; align-items:center; gap:14px; transition:var(--transition);" onmouseover="this.style.background='var(--gray-50)'" onmouseout="this.style.background=''">
+        <!-- Rank -->
+        <div class="rank-badge rank-{% if forloop.counter <= 3 %}{{ forloop.counter }}{% else %}other{% endif %}" style="flex-shrink:0">
+          {% if forloop.counter == 1 %}<i class="fas fa-crown"></i>
+          {% elif forloop.counter == 2 %}<i class="fas fa-medal"></i>
+          {% elif forloop.counter == 3 %}<i class="fas fa-award"></i>
+          {% else %}{{ forloop.counter }}{% endif %}
+        </div>
+
+        <!-- Avatar -->
+        <div class="citizen-avatar-lg" style="flex-shrink:0">
+          {{ citizen.user.first_name|first|upper }}{{ citizen.user.last_name|first|upper }}
+        </div>
+
+        <!-- Info -->
+        <div style="flex:1; min-width:0">
+          <div style="font-weight:700; font-size:14px; color:var(--gray-800)">{{ citizen.user.get_full_name|default:citizen.user.username }}</div>
+          <div style="font-size:12px; color:var(--gray-600); margin-top:2px">
+            {% if citizen.ward_number %}Ward {{ citizen.ward_number }} &nbsp;·&nbsp;{% endif %}
+            {{ citizen.total_reports }} reports &nbsp;·&nbsp;
+            <span style="color:{{ citizen.get_level_badge_color }}; font-weight:600">{{ citizen.get_level }}</span>
+          </div>
+        </div>
+
+        <!-- Progress to cert -->
+        <div class="d-none d-md-block" style="width:150px; flex-shrink:0">
+          <div style="font-size:11px; color:var(--gray-600); margin-bottom:4px; display:flex; justify-content:space-between">
+            <span>Progress</span><span>{{ citizen.points|divisibleby:100 }}{{ citizen.points }}pts</span>
+          </div>
+          <div style="height:6px; background:var(--gray-100); border-radius:3px; overflow:hidden">
+            <div style="height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-light)); width:{{ citizen.progress_percentage }}%; border-radius:3px"></div>
+          </div>
+        </div>
+
+        <!-- Certificates -->
+        <div class="d-none d-md-flex flex-column align-items-center" style="width:70px; flex-shrink:0">
+          {% if citizen.certificates_earned > 0 %}
+          <div style="color:var(--gold); font-size:20px"><i class="fas fa-certificate"></i></div>
+          <div style="font-size:11px; color:var(--gold); font-weight:700">×{{ citizen.certificates_earned }}</div>
+          {% else %}
+          <div style="color:var(--gray-300); font-size:20px"><i class="far fa-certificate"></i></div>
+          {% endif %}
+        </div>
+
+        <!-- Points -->
+        <div style="text-align:right; flex-shrink:0">
+          <div style="font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700; color:var(--navy); line-height:1">{{ citizen.points }}</div>
+          <div style="font-size:11px; color:var(--gray-600)">points</div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="empty-state">
+        <i class="fas fa-users d-block"></i>
+        <h5>No Citizens Yet</h5>
+        <p>Be the first to register and start reporting!</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div style="text-align:center; margin-top:40px; padding:40px 20px; background:white; border-radius:var(--radius); box-shadow:var(--shadow-sm)">
+    <div style="font-size:36px; margin-bottom:12px">🏆</div>
+    <h4>Want to be on the Leaderboard?</h4>
+    <p style="color:var(--gray-600); max-width:400px; margin:0 auto 20px">Report civic issues in Tumakuru, earn 5 points per report, and climb the rankings!</p>
+    {% if user.is_authenticated %}
+    <a href="{% url 'submit_report' %}" class="btn-primary-civic"><i class="fas fa-plus-circle"></i> Report an Issue</a>
+    {% else %}
+    <a href="{% url 'register' %}" class="btn-primary-civic"><i class="fas fa-user-plus"></i> Register Now</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

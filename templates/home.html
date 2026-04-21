@@ -1,0 +1,329 @@
+{% extends 'base.html' %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="home-hero">
+  <div class="container px-4 position-relative">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6">
+        <div class="hero-eyebrow"><i class="fas fa-landmark me-2"></i>Tumakuru City Corporation</div>
+        <h1 class="fade-in-up">Report Civic Issues.<br>Earn Points. <span>Win Awards.</span></h1>
+        <p class="fade-in-up delay-1" style="color:rgba(255,255,255,0.75); font-size:17px; max-width:480px">
+          Be the change Tumakuru needs. Report road damage, garbage, water leaks, and more — earn <strong style="color:var(--gold-light)">5 points</strong> per report. Reach <strong style="color:var(--gold-light)">100 points</strong> to claim your <strong style="color:var(--gold-light)">Best Citizen Certificate</strong>.
+        </p>
+        <div class="d-flex flex-wrap gap-3 mt-4 fade-in-up delay-2">
+          {% if user.is_authenticated %}
+          <a href="{% url 'submit_report' %}" class="btn-primary-civic">
+            <i class="fas fa-plus-circle"></i> Report an Issue
+          </a>
+          <a href="{% url 'dashboard' %}" class="btn-navy" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.25)">
+            <i class="fas fa-tachometer-alt"></i> My Dashboard
+          </a>
+          {% else %}
+          <a href="{% url 'register' %}" class="btn-primary-civic">
+            <i class="fas fa-user-plus"></i> Join as Citizen
+          </a>
+          <a href="{% url 'login' %}" class="btn-navy" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.25)">
+            <i class="fas fa-sign-in-alt"></i> Login
+          </a>
+          {% endif %}
+        </div>
+
+        <div class="hero-stats-row fade-in-up delay-3">
+          <div class="hero-stat">
+            <div class="h-num">{{ stats.total_reports }}</div>
+            <div class="h-lbl">Issues Reported</div>
+          </div>
+          <div class="hero-divider"></div>
+          <div class="hero-stat">
+            <div class="h-num">{{ stats.resolved }}</div>
+            <div class="h-lbl">Resolved</div>
+          </div>
+          <div class="hero-divider"></div>
+          <div class="hero-stat">
+            <div class="h-num">{{ stats.in_progress }}</div>
+            <div class="h-lbl">In Progress</div>
+          </div>
+          <div class="hero-divider"></div>
+          <div class="hero-stat">
+            <div class="h-num">35</div>
+            <div class="h-lbl">Wards Covered</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6 fade-in-up delay-2">
+        <!-- Points info card -->
+        <div class="points-card">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+              <div style="color:rgba(255,255,255,0.6); font-size:13px; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px">Reward System</div>
+              <div style="font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:700; color:var(--gold-light)">Best Citizen Award</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.1); border-radius:50%; width:52px; height:52px; display:flex; align-items:center; justify-content:center; font-size:24px; color:var(--gold-light)">
+              <i class="fas fa-medal"></i>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-4">
+              <div style="background:rgba(255,255,255,0.08); border-radius:10px; padding:14px; text-align:center;">
+                <div style="font-size:1.6rem; font-weight:700; color:var(--gold-light); font-family:'Playfair Display',serif;">5</div>
+                <div style="font-size:11px; color:rgba(255,255,255,0.55); margin-top:2px;">Points/Report</div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div style="background:rgba(255,255,255,0.08); border-radius:10px; padding:14px; text-align:center;">
+                <div style="font-size:1.6rem; font-weight:700; color:var(--gold-light); font-family:'Playfair Display',serif;">100</div>
+                <div style="font-size:11px; color:rgba(255,255,255,0.55); margin-top:2px;">Points = Award</div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div style="background:rgba(255,255,255,0.08); border-radius:10px; padding:14px; text-align:center;">
+                <div style="font-size:1.6rem; font-weight:700; color:var(--gold-light); font-family:'Playfair Display',serif;">20</div>
+                <div style="font-size:11px; color:rgba(255,255,255,0.55); margin-top:2px;">Reports to Win</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="background:rgba(255,255,255,0.06); border-radius:10px; padding:16px;">
+            <div style="font-size:13px; color:rgba(255,255,255,0.7); margin-bottom:8px; font-weight:600;">Your Progress to Best Citizen</div>
+            <div class="progress-civic mb-2">
+              {% if user.is_authenticated %}
+              <div class="progress-bar" style="width:{{ user.profile.progress_percentage }}%"></div>
+              {% else %}
+              <div class="progress-bar" style="width:0%"></div>
+              {% endif %}
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:11px; color:rgba(255,255,255,0.5)">
+              <span>{% if user.is_authenticated %}{{ user.profile.points }} Points{% else %}0 Points{% endif %}</span>
+              <span>100 Points</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ISSUE CATEGORIES -->
+<section class="section-pad" style="background:var(--off-white)">
+  <div class="container px-4">
+    <div class="text-center mb-5">
+      <div style="color:var(--saffron); font-size:12px; font-weight:700; letter-spacing:2px; text-transform:uppercase; margin-bottom:8px">Issue Categories</div>
+      <h2>What Can You Report?</h2>
+      <p class="text-muted mt-2" style="max-width:520px; margin:0 auto">From pothole to pollution — every civic issue matters. Report it to the right department.</p>
+    </div>
+    <div class="row g-3">
+      {% for cat in categories %}
+      <div class="col-6 col-md-4 col-lg-2">
+        <a href="{% url 'report_list' %}?category={{ cat.id }}" class="text-decoration-none">
+          <div class="step-card h-100 text-center py-4">
+            <span style="font-size:32px; margin-bottom:12px; display:block; color:{{ cat.color }}">
+              <i class="{{ cat.icon }}"></i>
+            </span>
+            <div style="font-weight:600; font-size:13px; color:var(--gray-800)">{{ cat.name }}</div>
+            {% if cat.report_count %}
+            <div style="font-size:11px; color:var(--gray-600); margin-top:4px">{{ cat.report_count }} reports</div>
+            {% endif %}
+          </div>
+        </a>
+      </div>
+      {% empty %}
+      <div class="col-12 text-center text-muted">No categories added yet.</div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-it-works">
+  <div class="container px-4">
+    <div class="text-center mb-5">
+      <div style="color:var(--saffron); font-size:12px; font-weight:700; letter-spacing:2px; text-transform:uppercase; margin-bottom:8px">Simple Process</div>
+      <h2>How It Works</h2>
+    </div>
+    <div class="row g-4 text-center">
+      {% for step in "1234" %}
+      <div class="col-md-3">
+        <div class="step-card">
+          {% if forloop.counter == 1 %}
+          <span class="step-icon text-primary"><i class="fas fa-user-plus"></i></span>
+          <div class="step-number">1</div>
+          <h5 class="mt-3 mb-2">Register</h5>
+          <p class="text-muted small">Create your citizen account with your ward details in just 2 minutes.</p>
+          {% elif forloop.counter == 2 %}
+          <span class="step-icon" style="color:var(--saffron)"><i class="fas fa-camera"></i></span>
+          <div class="step-number">2</div>
+          <h5 class="mt-3 mb-2">Spot & Report</h5>
+          <p class="text-muted small">Spot a civic issue, fill in the details, upload a photo and submit.</p>
+          {% elif forloop.counter == 3 %}
+          <span class="step-icon" style="color:var(--gold)"><i class="fas fa-star"></i></span>
+          <div class="step-number">3</div>
+          <h5 class="mt-3 mb-2">Earn 5 Points</h5>
+          <p class="text-muted small">Every approved report instantly credits 5 civic points to your account.</p>
+          {% else %}
+          <span class="step-icon" style="color:var(--green)"><i class="fas fa-certificate"></i></span>
+          <div class="step-number">4</div>
+          <h5 class="mt-3 mb-2">Win Certificate</h5>
+          <p class="text-muted small">Reach 100 points and earn the official Best Citizen Certificate from TCC!</p>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- RECENT ISSUES + TOP CITIZENS -->
+<section class="section-pad" style="background:var(--off-white)">
+  <div class="container px-4">
+    <div class="row g-4">
+
+      <!-- Recent Reports -->
+      <div class="col-lg-8">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h2 style="font-size:1.6rem">Recent Reports</h2>
+          <a href="{% url 'report_list' %}" class="btn-primary-civic" style="padding:8px 20px; font-size:13px">View All <i class="fas fa-arrow-right ms-1"></i></a>
+        </div>
+        <div class="row g-3">
+          {% for report in recent_reports %}
+          <div class="col-md-6">
+            <div class="issue-card h-100">
+              <div class="card-status-bar" style="background:{{ report.get_status_color }};"></div>
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <span class="report-id">{{ report.report_id }}</span>
+                  <span class="badge-status" style="background:{{ report.get_status_color }}20; color:{{ report.get_status_color }}">
+                    {{ report.get_status_display }}
+                  </span>
+                </div>
+                <h6 class="card-title mb-2">
+                  <a href="{% url 'report_detail' report.pk %}">{{ report.title }}</a>
+                </h6>
+                {% if report.category %}
+                <div class="category-chip mb-2">
+                  <i class="{{ report.category.icon }}" style="color:{{ report.category.color }}"></i>
+                  {{ report.category.name }}
+                </div>
+                {% endif %}
+                <div class="d-flex justify-content-between align-items-center mt-3" style="font-size:12px; color:var(--gray-600)">
+                  <span><i class="fas fa-map-marker-alt me-1 text-saffron"></i>Ward {{ report.ward_number }}</span>
+                  <span><i class="fas fa-clock me-1"></i>{{ report.created_at|timesince }} ago</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% empty %}
+          <div class="col-12">
+            <div class="empty-state">
+              <i class="fas fa-clipboard-list d-block"></i>
+              <h5>No reports yet</h5>
+              <p>Be the first citizen to report a civic issue!</p>
+              <a href="{% url 'submit_report' %}" class="btn-primary-civic mt-2">Report Now</a>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Top Citizens -->
+      <div class="col-lg-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h2 style="font-size:1.6rem">Top Citizens</h2>
+          <a href="{% url 'leaderboard' %}" style="font-size:13px; color:var(--saffron); text-decoration:none; font-weight:600">Full List →</a>
+        </div>
+        <div class="sidebar-nav">
+          <div class="nav-header">
+            <div style="display:flex; align-items:center; gap:10px">
+              <i class="fas fa-trophy" style="color:var(--gold-light); font-size:20px"></i>
+              <div>
+                <div style="font-weight:700">Leaderboard</div>
+                <div style="font-size:12px; opacity:0.6">Best Citizens of Tumakuru</div>
+              </div>
+            </div>
+          </div>
+          {% for citizen in top_citizens %}
+          <div style="padding:14px 18px; border-bottom:1px solid var(--gray-50); display:flex; align-items:center; gap:12px">
+            <div class="rank-badge rank-{% if forloop.counter <= 3 %}{{ forloop.counter }}{% else %}other{% endif %}">
+              {% if forloop.counter == 1 %}<i class="fas fa-crown"></i>
+              {% elif forloop.counter == 2 %}2
+              {% elif forloop.counter == 3 %}3
+              {% else %}{{ forloop.counter }}{% endif %}
+            </div>
+            <div class="citizen-avatar-lg" style="width:36px; height:36px; font-size:13px;">
+              {{ citizen.user.first_name|first|upper }}{{ citizen.user.last_name|first|upper }}
+            </div>
+            <div style="flex:1; min-width:0">
+              <div style="font-weight:600; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">
+                {{ citizen.user.get_full_name|default:citizen.user.username }}
+              </div>
+              <div style="font-size:11px; color:var(--gray-600)">{{ citizen.total_reports }} reports</div>
+            </div>
+            <div style="text-align:right; flex-shrink:0">
+              <div style="font-weight:700; color:var(--navy); font-size:14px">{{ citizen.points }}</div>
+              <div style="font-size:10px; color:var(--gold)">pts</div>
+            </div>
+          </div>
+          {% empty %}
+          <div style="padding:24px; text-align:center; color:var(--gray-600); font-size:13px">
+            Be the first citizen on the leaderboard!
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EMERGENCY CONTACTS STRIP -->
+<section style="background:linear-gradient(135deg,#7B0000,#C0392B); padding:40px 0;">
+  <div class="container px-4">
+    <div class="row align-items-center g-4">
+      <div class="col-lg-5">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div style="width:52px;height:52px;background:rgba(255,255,255,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;color:#FFD700;flex-shrink:0;">
+            <i class="fas fa-phone-alt"></i>
+          </div>
+          <div>
+            <div style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:white;line-height:1.1">Emergency Helpline Directory</div>
+            <div style="font-size:13px;color:rgba(255,255,255,.7)">All Tumakuru emergency contacts in one place</div>
+          </div>
+        </div>
+        <a href="{% url 'emergency' %}" class="btn-gold" style="display:inline-flex">
+          <i class="fas fa-phone-volume"></i> View All Emergency Contacts
+        </a>
+      </div>
+      <div class="col-lg-7">
+        <div class="row g-2">
+          {% for num in emergency_numbers %}
+          <div class="col-6 col-md-4">
+            <a href="tel:{{ num.number }}" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;text-decoration:none;transition:all .25s" onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">
+              <div style="font-size:20px;color:#FFD700;width:28px;text-align:center;flex-shrink:0"><i class="{{ num.icon }}"></i></div>
+              <div>
+                <div style="font-weight:700;font-size:12px;color:rgba(255,255,255,.8)">{{ num.label }}</div>
+                <div style="font-weight:900;font-size:18px;color:#FFD700;font-family:'Playfair Display',serif;line-height:1">{{ num.number }}</div>
+              </div>
+            </a>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA STRIP -->
+{% if not user.is_authenticated %}
+<section style="background:linear-gradient(135deg,var(--saffron),#D44D0E); padding:56px 0; text-align:center;">
+  <div class="container px-4">
+    <h2 style="color:white; font-size:2rem; margin-bottom:12px">Ready to Make Tumakuru Better?</h2>
+    <p style="color:rgba(255,255,255,0.85); max-width:480px; margin:0 auto 28px">Join thousands of active citizens who are transforming their city — one report at a time.</p>
+    <a href="{% url 'register' %}" class="btn-gold"><i class="fas fa-user-plus"></i> Register as a Citizen</a>
+  </div>
+</section>
+{% endif %}
+
+{% endblock %}
