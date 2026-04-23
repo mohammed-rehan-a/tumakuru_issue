@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block title %}Analytics Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <div class="container px-4">
+    <h1 class="mt-2">Analytics Dashboard</h1>
+    <p style="opacity:.75; margin:0">Overview of civic issue reports in Tumakuru.</p>
+  </div>
+  <div class="page-hero-tricolor"></div>
+</div>
+
+<div class="container px-4 py-5">
+  <div class="row g-4">
+    
+    <!-- Status Distribution Chart -->
+    <div class="col-md-6">
+      <div class="card shadow-sm border-0 h-100">
+        <div class="card-body">
+          <h5 class="card-title fw-bold">Report Status Distribution</h5>
+          <canvas id="statusChart"></canvas>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Top Categories Chart -->
+    <div class="col-md-6">
+      <div class="card shadow-sm border-0 h-100">
+        <div class="card-body">
+          <h5 class="card-title fw-bold">Top Issue Categories</h5>
+          <canvas id="categoryChart"></canvas>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Monthly Trends Chart -->
+    <div class="col-12">
+      <div class="card shadow-sm border-0 h-100">
+        <div class="card-body">
+          <h5 class="card-title fw-bold">Monthly Reports ({{ year }})</h5>
+          <canvas id="monthlyChart" height="100"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  // Status Chart
+  const ctxStatus = document.getElementById('statusChart').getContext('2d');
+  new Chart(ctxStatus, {
+    type: 'doughnut',
+    data: {
+      labels: {{ status_labels|safe }},
+      datasets: [{
+        data: {{ status_data|safe }},
+        backgroundColor: ['#4CAF50', '#FF9800', '#F44336', '#2196F3', '#9C27B0', '#607D8B']
+      }]
+    }
+  });
+
+  // Category Chart
+  const ctxCat = document.getElementById('categoryChart').getContext('2d');
+  new Chart(ctxCat, {
+    type: 'pie',
+    data: {
+      labels: {{ cat_labels|safe }},
+      datasets: [{
+        data: {{ cat_data|safe }},
+        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
+      }]
+    }
+  });
+
+  // Monthly Chart
+  const ctxMonth = document.getElementById('monthlyChart').getContext('2d');
+  new Chart(ctxMonth, {
+    type: 'bar',
+    data: {
+      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+      datasets: [{
+        label: 'Number of Reports',
+        data: {{ monthly_data|safe }},
+        backgroundColor: '#1A5276',
+      }]
+    },
+    options: {
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Volunteer for Tumakuru{% endblock %}
+
+{% block content %}
+<div class="page-hero" style="background:linear-gradient(135deg, #1A5276, #2E86C1);">
+  <div class="container px-4 text-center">
+    <h1 class="mt-2 text-white"><i class="fas fa-hands-helping me-2"></i>Volunteer for Tumakuru</h1>
+    <p class="text-white-50">Join hands to make our city cleaner, greener, and better. Earn extra civic points for your contribution.</p>
+  </div>
+</div>
+
+<div class="container px-4 py-5">
+  {% if tasks %}
+  <div class="row g-4">
+    {% for task in tasks %}
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100 shadow-sm border-0" style="border-radius:15px; overflow:hidden;">
+        <div style="height:6px; background:var(--gold-light);"></div>
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <h5 class="card-title fw-bold text-navy mb-0">{{ task.title }}</h5>
+            <span class="badge bg-warning text-dark"><i class="fas fa-star me-1"></i>{{ task.points_reward }} pts</span>
+          </div>
+          <p class="text-muted small"><i class="fas fa-map-marker-alt me-1 text-danger"></i> {{ task.location }}</p>
+          <p class="card-text text-secondary" style="font-size:0.95rem;">{{ task.description }}</p>
+          
+          <hr class="my-3">
+          
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="text-muted small"><i class="far fa-calendar-alt me-1"></i> {{ task.created_at|date:"M d, Y" }}</span>
+            {% if user.is_authenticated %}
+              {% if task.id in user_tasks %}
+                <button class="btn btn-sm btn-success disabled"><i class="fas fa-check-circle me-1"></i> Volunteered</button>
+              {% else %}
+                <form action="{% url 'volunteer_signup' task.id %}" method="post">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-primary" style="background:var(--navy); border:none;">Opt In</button>
+                </form>
+              {% endif %}
+            {% else %}
+              <a href="{% url 'login' %}?next={% url 'volunteer_list' %}" class="btn btn-sm btn-outline-primary">Login to Volunteer</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center py-5">
+    <div style="font-size:4rem; color:var(--gray-300); margin-bottom:20px;"><i class="fas fa-clipboard-check"></i></div>
+    <h3 class="text-navy fw-bold">No active tasks right now</h3>
+    <p class="text-muted">Check back later for new opportunities to help the city.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

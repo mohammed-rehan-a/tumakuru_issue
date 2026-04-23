@@ -130,3 +130,23 @@ class IssueUpvote(models.Model):
 
     class Meta:
         unique_together = ('issue', 'citizen')
+
+class VolunteerTask(models.Model):
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    points_reward = models.PositiveIntegerField(default=10)
+    location = models.CharField(max_length=255)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.title
+
+class VolunteerLog(models.Model):
+    task = models.ForeignKey(VolunteerTask, on_delete=models.CASCADE, related_name='volunteers')
+    citizen = models.ForeignKey(User, on_delete=models.CASCADE)
+    joined_at = models.DateTimeField(auto_now_add=True)
+    completed = models.BooleanField(default=False)
+    
+    class Meta:
+        unique_together = ('task', 'citizen')

@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'crispy_bootstrap5',
     'widget_tweaks',
+    'rest_framework',
     'accounts',
     'reports',
 ]

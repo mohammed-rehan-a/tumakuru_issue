@@ -1,208 +1,443 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}Tumakuru Civic Portal{% endblock %} — TCC</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <link href="{% static 'css/main.css' %}" rel="stylesheet">
+  <link rel="manifest" href="{% static 'manifest.json' %}">
+  <meta name="theme-color" content="#1A5276">
+  <link rel="apple-touch-icon" href="{% static 'images/logo-192.png' %}">
+  <style>
+    /* Chatbot Styles */
+    #chatbot-widget {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 9999;
+    }
+
+    #chatbot-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: var(--navy);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      cursor: pointer;
+      border: none;
+      transition: transform 0.2s;
+    }
+
+    #chatbot-btn:hover {
+      transform: scale(1.05);
+    }
+
+    #chatbot-window {
+      display: none;
+      width: 320px;
+      height: 420px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+      flex-direction: column;
+      overflow: hidden;
+      position: absolute;
+      bottom: 80px;
+      right: 0;
+    }
+
+    #chatbot-header {
+      background: var(--navy);
+      color: white;
+      padding: 15px;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #chatbot-messages {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      background: #f9f9f9;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-size: 14px;
+    }
+
+    #chatbot-input-container {
+      display: flex;
+      border-top: 1px solid #eee;
+    }
+
+    #chatbot-input {
+      flex: 1;
+      border: none;
+      padding: 12px 15px;
+      outline: none;
+    }
+
+    #chatbot-send {
+      background: white;
+      border: none;
+      padding: 0 15px;
+      color: var(--navy);
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .chat-msg {
+      max-width: 80%;
+      padding: 10px 14px;
+      border-radius: 18px;
+      line-height: 1.4;
+      word-wrap: break-word;
+    }
+
+    .chat-msg.bot {
+      background: white;
+      color: #333;
+      border: 1px solid #eee;
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+    }
+
+    .chat-msg.user {
+      background: var(--navy);
+      color: white;
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+  </style>
   {% block extra_css %}{% endblock %}
 </head>
+
 <body>
 
-<!-- TOP GOV STRIP -->
-<div class="gov-strip">
-  <div class="container-fluid px-4">
-    <div class="d-flex justify-content-between align-items-center">
-      <div class="d-flex align-items-center gap-3">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg" alt="Emblem" height="26" style="filter:brightness(10)">
-        <span>Government of Karnataka &nbsp;|&nbsp; ಕರ್ನಾಟಕ ಸರ್ಕಾರ</span>
-      </div>
-      <div class="d-flex gap-3 align-items-center">
-        <span><i class="fas fa-phone-alt me-1"></i> Helpline: 1800-425-0006</span>
-        <span class="d-none d-md-inline">|</span>
-        <span class="d-none d-md-inline"><i class="fas fa-envelope me-1"></i> civic@tumakuru.gov.in</span>
+  <!-- TOP GOV STRIP -->
+  <div class="gov-strip">
+    <div class="container-fluid px-4">
+      <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-3">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg" alt="Emblem" height="26"
+            style="filter:brightness(10)">
+          <span>Government of Karnataka &nbsp;|&nbsp; ಕರ್ನಾಟಕ ಸರ್ಕಾರ</span>
+        </div>
+        <div class="d-flex gap-3 align-items-center">
+          <span><i class="fas fa-phone-alt me-1"></i> Helpline: 1800-425-0006</span>
+          <span class="d-none d-md-inline">|</span>
+          <span class="d-none d-md-inline"><i class="fas fa-envelope me-1"></i> civic@tumakuru.gov.in</span>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- MAIN NAVBAR -->
-<nav class="navbar navbar-expand-lg main-nav">
-  <div class="container-fluid px-4">
-    <!-- Brand -->
-    <a class="navbar-brand d-flex align-items-center gap-3" href="{% url 'home' %}">
-      <div class="brand-emblem">
-        <i class="fas fa-city"></i>
+  <!-- MAIN NAVBAR -->
+  <nav class="navbar navbar-expand-lg main-nav">
+    <div class="container-fluid px-4">
+      <!-- Brand -->
+      <a class="navbar-brand d-flex align-items-center gap-3" href="{% url 'home' %}">
+        <div class="brand-emblem">
+          <i class="fas fa-city"></i>
+        </div>
+        <div>
+          <div class="brand-title">Tumakuru City Corporation</div>
+          <div class="brand-sub">ತುಮಕೂರು ನಗರ ನಿಗಮ · Civic Issue Portal</div>
+        </div>
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="mainNav">
+        <ul class="navbar-nav ms-auto align-items-center gap-1">
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'home' %}"><i class="fas fa-home me-1"></i> Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'report_list' %}"><i class="fas fa-map-marked-alt me-1"></i> All Issues</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'leaderboard' %}"><i class="fas fa-trophy me-1"></i> Leaderboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'volunteer_list' %}"><i class="fas fa-hands-helping me-1"></i>
+              Volunteer</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link btn-emergency-nav" href="{% url 'emergency' %}">
+              <i class="fas fa-phone-alt me-1"></i> Emergency
+            </a>
+          </li>
+          <li class="nav-item">
+            <button id="theme-toggle" class="nav-link"
+              style="background:none; border:none; outline:none; font-size:16px;">
+              <i class="fas fa-moon"></i>
+            </button>
+          </li>
+          {% if user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt me-1"></i> Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link btn-submit-nav" href="{% url 'submit_report' %}">
+              <i class="fas fa-plus-circle me-1"></i> Report Issue
+            </a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" data-bs-toggle="dropdown">
+              <div class="nav-avatar">{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}</div>
+              <span class="d-none d-lg-inline">{{ user.first_name|default:user.username }}</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end nav-dropdown">
+              <li>
+                <div class="dropdown-header">
+                  <div class="fw-600">{{ user.get_full_name|default:user.username }}</div>
+                  <div class="text-muted small">{{ user.profile.get_level }}</div>
+                  <div class="pts-badge mt-1"><i class="fas fa-star me-1"></i>{{ user.profile.points }} Points</div>
+                </div>
+              </li>
+              <li>
+                <hr class="dropdown-divider">
+              </li>
+              <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="fas fa-user me-2"></i>My Profile</a>
+              </li>
+              <li><a class="dropdown-item" href="{% url 'my_reports' %}"><i class="fas fa-file-alt me-2"></i>My
+                  Reports</a></li>
+              <li><a class="dropdown-item" href="{% url 'dashboard' %}"><i
+                    class="fas fa-chart-bar me-2"></i>Dashboard</a></li>
+              {% if user.is_staff %}
+              <li>
+                <hr class="dropdown-divider">
+              </li>
+              <li><a class="dropdown-item text-danger" href="/admin/"><i class="fas fa-shield-alt me-2"></i>Admin
+                  Panel</a></li>
+              <li><a class="dropdown-item text-danger" href="{% url 'analytics_dashboard' %}"><i
+                    class="fas fa-chart-pie me-2"></i>Analytics Dashboard</a></li>
+              {% endif %}
+              <li>
+                <hr class="dropdown-divider">
+              </li>
+              <li><a class="dropdown-item text-danger" href="{% url 'logout' %}"><i
+                    class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+            </ul>
+          </li>
+          {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'login' %}"><i class="fas fa-sign-in-alt me-1"></i> Login</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link btn-register-nav" href="{% url 'register' %}">
+              <i class="fas fa-user-plus me-1"></i> Register
+            </a>
+          </li>
+          {% endif %}
+        </ul>
       </div>
-      <div>
-        <div class="brand-title">Tumakuru City Corporation</div>
-        <div class="brand-sub">ತುಮಕೂರು ನಗರ ನಿಗಮ · Civic Issue Portal</div>
+    </div>
+  </nav>
+
+  <!-- MESSAGES -->
+  {% if messages %}
+  <div class="messages-container">
+    <div class="container-fluid px-4">
+      {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show msg-alert" role="alert">
+        {% if message.tags == 'success' %}<i class="fas fa-check-circle me-2"></i>
+        {% elif message.tags == 'error' %}<i class="fas fa-exclamation-circle me-2"></i>
+        {% elif message.tags == 'warning' %}<i class="fas fa-exclamation-triangle me-2"></i>
+        {% else %}<i class="fas fa-info-circle me-2"></i>{% endif %}
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
       </div>
-    </a>
-
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <div class="collapse navbar-collapse" id="mainNav">
-      <ul class="navbar-nav ms-auto align-items-center gap-1">
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'home' %}"><i class="fas fa-home me-1"></i> Home</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'report_list' %}"><i class="fas fa-map-marked-alt me-1"></i> All Issues</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'leaderboard' %}"><i class="fas fa-trophy me-1"></i> Leaderboard</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link btn-emergency-nav" href="{% url 'emergency' %}">
-            <i class="fas fa-phone-alt me-1"></i> Emergency
-          </a>
-        </li>
-        {% if user.is_authenticated %}
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt me-1"></i> Dashboard</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link btn-submit-nav" href="{% url 'submit_report' %}">
-            <i class="fas fa-plus-circle me-1"></i> Report Issue
-          </a>
-        </li>
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" data-bs-toggle="dropdown">
-            <div class="nav-avatar">{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}</div>
-            <span class="d-none d-lg-inline">{{ user.first_name|default:user.username }}</span>
-          </a>
-          <ul class="dropdown-menu dropdown-menu-end nav-dropdown">
-            <li><div class="dropdown-header">
-              <div class="fw-600">{{ user.get_full_name|default:user.username }}</div>
-              <div class="text-muted small">{{ user.profile.get_level }}</div>
-              <div class="pts-badge mt-1"><i class="fas fa-star me-1"></i>{{ user.profile.points }} Points</div>
-            </div></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="fas fa-user me-2"></i>My Profile</a></li>
-            <li><a class="dropdown-item" href="{% url 'my_reports' %}"><i class="fas fa-file-alt me-2"></i>My Reports</a></li>
-            <li><a class="dropdown-item" href="{% url 'dashboard' %}"><i class="fas fa-chart-bar me-2"></i>Dashboard</a></li>
-            {% if user.is_staff %}
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item text-danger" href="/admin/"><i class="fas fa-shield-alt me-2"></i>Admin Panel</a></li>
-            {% endif %}
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item text-danger" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
-          </ul>
-        </li>
-        {% else %}
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'login' %}"><i class="fas fa-sign-in-alt me-1"></i> Login</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link btn-register-nav" href="{% url 'register' %}">
-            <i class="fas fa-user-plus me-1"></i> Register
-          </a>
-        </li>
-        {% endif %}
-      </ul>
+      {% endfor %}
     </div>
   </div>
-</nav>
+  {% endif %}
 
-<!-- MESSAGES -->
-{% if messages %}
-<div class="messages-container">
-  <div class="container-fluid px-4">
-    {% for message in messages %}
-    <div class="alert alert-{{ message.tags }} alert-dismissible fade show msg-alert" role="alert">
-      {% if message.tags == 'success' %}<i class="fas fa-check-circle me-2"></i>
-      {% elif message.tags == 'error' %}<i class="fas fa-exclamation-circle me-2"></i>
-      {% elif message.tags == 'warning' %}<i class="fas fa-exclamation-triangle me-2"></i>
-      {% else %}<i class="fas fa-info-circle me-2"></i>{% endif %}
-      {{ message }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-    {% endfor %}
-  </div>
-</div>
-{% endif %}
+  <!-- MAIN CONTENT -->
+  <main>{% block content %}{% endblock %}</main>
 
-<!-- MAIN CONTENT -->
-<main>{% block content %}{% endblock %}</main>
-
-<!-- FOOTER -->
-<footer class="site-footer">
-  <div class="footer-top">
-    <div class="container px-4">
-      <div class="row g-4">
-        <div class="col-lg-4">
-          <div class="d-flex align-items-center gap-3 mb-3">
-            <div class="footer-emblem"><i class="fas fa-city"></i></div>
-            <div>
-              <div class="footer-brand">Tumakuru City Corporation</div>
-              <div class="footer-brand-sub">ತುಮಕೂರು ನಗರ ನಿಗಮ</div>
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="footer-top">
+      <div class="container px-4">
+        <div class="row g-4">
+          <div class="col-lg-4">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="footer-emblem"><i class="fas fa-city"></i></div>
+              <div>
+                <div class="footer-brand">Tumakuru City Corporation</div>
+                <div class="footer-brand-sub">ತುಮಕೂರು ನಗರ ನಿಗಮ</div>
+              </div>
+            </div>
+            <p class="footer-desc">Empowering citizens to build a better Tumakuru. Report civic issues, earn points, and
+              be recognized as the Best Citizen of our city.</p>
+            <div class="d-flex gap-3 mt-3">
+              <a href="#" class="footer-social"><i class="fab fa-facebook-f"></i></a>
+              <a href="#" class="footer-social"><i class="fab fa-twitter"></i></a>
+              <a href="#" class="footer-social"><i class="fab fa-youtube"></i></a>
+              <a href="#" class="footer-social"><i class="fab fa-instagram"></i></a>
             </div>
           </div>
-          <p class="footer-desc">Empowering citizens to build a better Tumakuru. Report civic issues, earn points, and be recognized as the Best Citizen of our city.</p>
-          <div class="d-flex gap-3 mt-3">
-            <a href="#" class="footer-social"><i class="fab fa-facebook-f"></i></a>
-            <a href="#" class="footer-social"><i class="fab fa-twitter"></i></a>
-            <a href="#" class="footer-social"><i class="fab fa-youtube"></i></a>
-            <a href="#" class="footer-social"><i class="fab fa-instagram"></i></a>
-          </div>
-        </div>
-        <div class="col-lg-2 col-6">
-          <h6 class="footer-heading">Quick Links</h6>
-          <ul class="footer-links">
-            <li><a href="{% url 'home' %}">Home</a></li>
-            <li><a href="{% url 'submit_report' %}">Report Issue</a></li>
-            <li><a href="{% url 'report_list' %}">All Reports</a></li>
-            <li><a href="{% url 'leaderboard' %}">Leaderboard</a></li>
-            <li><a href="{% url 'emergency' %}" style="color:#FF6B6B; font-weight:700">🚨 Emergency Contacts</a></li>
-          </ul>
-        </div>
-        <div class="col-lg-2 col-6">
-          <h6 class="footer-heading">Citizen Services</h6>
-          <ul class="footer-links">
-            <li><a href="{% url 'register' %}">Register</a></li>
-            <li><a href="{% url 'login' %}">Login</a></li>
-            <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
-            <li><a href="#">Help & FAQ</a></li>
-          </ul>
-        </div>
-        <div class="col-lg-4">
-          <h6 class="footer-heading">Contact Information</h6>
-          <div class="footer-contact">
-            <p><i class="fas fa-map-marker-alt"></i> Tumakuru City Corporation, B.H. Road, Tumakuru – 572 101, Karnataka</p>
-            <p><i class="fas fa-phone"></i> Helpline: 1800-425-0006 (Toll Free)</p>
-            <p><i class="fas fa-envelope"></i> civic@tumakuru.gov.in</p>
-            <p><i class="fas fa-clock"></i> Mon – Sat: 9:00 AM to 5:30 PM</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="footer-bottom">
-    <div class="container px-4">
-      <div class="d-flex flex-wrap justify-content-between align-items-center">
-        <div>© 2024 Tumakuru City Corporation. All Rights Reserved.</div>
-        <div class="d-flex gap-3">
-          <a href="#">Privacy Policy</a>
-          <a href="#">Terms of Use</a>
-          <a href="#">Accessibility</a>
-          <a href="#">Sitemap</a>
-        </div>
-      </div>
-    </div>
-  </div>
-</footer>
+          <div class="col-lg-2 col-6">
+            <h6 class="footer-heading">Quick Links</h6>
+            <ul class="footer-links">
+              <li><a href="{% url 'home' %}">Home</a></li>
+              <li><a href="{% url 'submit_report' %}">Report Issue</a></li>
+              <li><a href="{% url 'report_list' %}">All Reports</a></li>
+              <li><a href="{% url 'leaderboard' %}">Leaderboard</a></li>
+              <li><a href="https://tumakurucitycorp.org/WebSite/Citizen/HomeTMK.aspx">pay tax & info</a></li>
+              <li><a href="https://www.bescom.co.in/bescom/main/home">BESCOM</a></li>
+              <li><a href="https://www.ssit.edu.in/index.html">SSIT</a></li>
+              <li><a href="https://tumkurpolice.karnataka.gov.in/">police</a></li>
+              <li><a href="https://ksrtc.karnataka.gov.in/en">KSRTC</a></li>
+              <li><a href="https://aranya.gov.in/aranyacms/(S(ui2fz54ojqcscz1hg14uvvds))/English/Home.aspx">Forest
+                  department karnataka</a></li>
+              <!-- <li><a href="https://asi.nic.in/">ASI</a></li> -->
+              <!-- <li><a href="https://asi.nic.in/">ASI</a></li> -->
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="{% static 'js/main.js' %}"></script>
-{% block extra_js %}{% endblock %}
+              <li><a href="{% url 'emergency' %}" style="color:#FF6B6B; font-weight:700">🚨 Emergency Contacts</a></li>
+            </ul>
+          </div>
+          <div class="col-lg-2 col-6">
+            <h6 class="footer-heading">Citizen Services</h6>
+            <ul class="footer-links">
+              <li><a href="{% url 'register' %}">Register</a></li>
+              <li><a href="{% url 'login' %}">Login</a></li>
+              <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+              <li><a href="#">Help & FAQ</a></li>
+            </ul>
+          </div>
+          <div class="col-lg-4">
+            <h6 class="footer-heading">Contact Information</h6>
+            <div class="footer-contact">
+              <p><i class="fas fa-map-marker-alt"></i> Tumakuru City Corporation, B.H. Road, Tumakuru – 572 101,
+                Karnataka</p>
+              <p><i class="fas fa-phone"></i> Helpline: 1800-425-0006 (Toll Free)</p>
+              <p><i class="fas fa-envelope"></i> civic@tumakuru.gov.in</p>
+              <p><i class="fas fa-clock"></i> Mon – Sat: 9:00 AM to 5:30 PM</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container px-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center">
+          <div>© 2024 Tumakuru City Corporation. All Rights Reserved.</div>
+          <div class="d-flex gap-3">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Use</a>
+            <a href="#">Accessibility</a>
+            <a href="#">Sitemap</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- CHATBOT WIDGET -->
+  <div id="chatbot-widget">
+    <div id="chatbot-window">
+      <div id="chatbot-header">
+        <div><i class="fas fa-robot me-2"></i> TCC Helper</div>
+        <button onclick="toggleChat()" style="background:none;border:none;color:white"><i
+            class="fas fa-times"></i></button>
+      </div>
+      <div id="chatbot-messages">
+        <div class="chat-msg bot">Hi! I can help you check the status of your issue. Just type your Report ID.</div>
+      </div>
+      <div id="chatbot-input-container">
+        <input type="text" id="chatbot-input" placeholder="Type here..."
+          onkeypress="if(event.key === 'Enter') sendChat()">
+        <button id="chatbot-send" onclick="sendChat()"><i class="fas fa-paper-plane"></i></button>
+      </div>
+    </div>
+    <button id="chatbot-btn" onclick="toggleChat()"><i class="fas fa-comments"></i></button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{% static 'js/main.js' %}"></script>
+  <script>
+    // Dark Mode Logic
+    const themeToggle = document.getElementById('theme-toggle');
+    const body = document.body;
+    const currentTheme = localStorage.getItem('theme');
+
+    if (currentTheme) {
+      body.classList.add(currentTheme);
+      if (currentTheme === 'dark-mode') themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+    }
+
+    themeToggle.addEventListener('click', () => {
+      body.classList.toggle('dark-mode');
+      if (body.classList.contains('dark-mode')) {
+        localStorage.setItem('theme', 'dark-mode');
+        themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+      } else {
+        localStorage.setItem('theme', '');
+        themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+      }
+    });
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/static/sw.js').then(reg => {
+          console.log('SW registered!', reg);
+        }).catch(err => console.log('SW registration failed', err));
+      });
+    }
+
+    // Chatbot logic
+    function toggleChat() {
+      const win = document.getElementById('chatbot-window');
+      win.style.display = win.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    function sendChat() {
+      const input = document.getElementById('chatbot-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      appendMessage(text, 'user');
+      input.value = '';
+
+      fetch(`/reports/chatbot/?text=${encodeURIComponent(text)}`)
+        .then(res => res.json())
+        .then(data => {
+          appendMessage(data.reply, 'bot');
+        });
+    }
+
+    function appendMessage(text, sender) {
+      const msgs = document.getElementById('chatbot-messages');
+      const div = document.createElement('div');
+      div.className = `chat-msg ${sender}`;
+      // Replace **text** with <strong>text</strong>
+      div.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      msgs.appendChild(div);
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+  </script>
+  {% block extra_js %}{% endblock %}
 </body>
+
 </html>

@@ -185,6 +185,34 @@
         </div>
       </div>
 
+      <!-- Action Buttons (Print & Share) -->
+      <div class="detail-card mb-4 d-print-none">
+        <div class="detail-body p-3">
+          <div class="d-grid gap-2">
+            <button onclick="window.print()" class="btn btn-outline-secondary w-100">
+              <i class="fas fa-print me-2"></i> Print Report
+            </button>
+            <a href="https://api.whatsapp.com/send?text=Check%20out%20this%20civic%20report:%20{{ request.build_absolute_uri }}" target="_blank" class="btn btn-success w-100">
+              <i class="fab fa-whatsapp me-2"></i> Share on WhatsApp
+            </a>
+            <button onclick="copyReportLink()" class="btn btn-outline-primary w-100">
+              <i class="fas fa-link me-2"></i> Copy Link
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- QR Code -->
+      <div class="detail-card mb-4 text-center d-print-none">
+        <div class="detail-header">
+          <h6 class="mb-0 fw-700"><i class="fas fa-qrcode me-2 text-saffron"></i>Scan Report</h6>
+        </div>
+        <div class="detail-body">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ request.build_absolute_uri|urlencode }}" alt="QR Code" class="img-fluid border p-2 bg-white rounded">
+          <p class="small text-muted mt-2 mb-0">Scan to view this report on your phone</p>
+        </div>
+      </div>
+
       <!-- Status Timeline -->
       <div class="detail-card">
         <div class="detail-header">
@@ -222,6 +250,12 @@ function upvoteReport(pk) {
     document.getElementById('upvoteCount').textContent = data.upvotes;
     const btn = document.getElementById('upvoteBtn');
     if(data.upvoted) { btn.classList.remove('btn-outline-secondary'); btn.classList.add('btn-success'); }
+  });
+}
+
+function copyReportLink() {
+  navigator.clipboard.writeText(window.location.href).then(() => {
+    alert("Report link copied to clipboard!");
   });
 }
 </script>

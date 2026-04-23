@@ -985,3 +985,46 @@ h1, h2, h3, .display-font { font-family: 'Playfair Display', Georgia, serif; }
   .points-number { font-size: 2.2rem; }
   .form-section-body { padding: 20px; }
 }
+
+/* ============================================================
+   DARK MODE
+   ============================================================ */
+body.dark-mode {
+  --off-white:  #121212;
+  --white:      #1E1E1E;
+  --gray-800:   #E4E6EB;
+  --gray-600:   #B0B8C4;
+  --gray-100:   #2D3748;
+  --gray-50:    #222222;
+  --navy:       #1E1E1E;
+  --navy-mid:   #2D3748;
+  background: var(--off-white);
+  color: var(--gray-800);
+}
+
+body.dark-mode .main-nav { background: var(--white); border-bottom-color: var(--navy-mid); }
+body.dark-mode .main-nav .nav-link { color: var(--gray-800) !important; }
+body.dark-mode .main-nav .nav-link:hover { background: var(--gray-50); color: white !important; }
+body.dark-mode .detail-card, body.dark-mode .stat-card, body.dark-mode .issue-card, body.dark-mode .form-section {
+  background: var(--white);
+  border-color: var(--gray-100);
+}
+body.dark-mode .detail-header, body.dark-mode .form-section-header { background: var(--navy-mid); }
+body.dark-mode .form-control, body.dark-mode .form-select {
+  background: var(--gray-50);
+  border-color: var(--gray-100);
+  color: var(--gray-800);
+}
+
+/* ============================================================
+   PRINT STYLES
+   ============================================================ */
+@media print {
+  body { background: white !important; color: black !important; }
+  .gov-strip, .main-nav, .site-footer, .breadcrumb, #chatbot-widget, .d-print-none { display: none !important; }
+  .detail-card { border: 1px solid #ccc !important; box-shadow: none !important; break-inside: avoid; }
+  .page-hero { background: white !important; color: black !important; padding: 20px 0 !important; border-bottom: 2px solid black; }
+  .page-hero * { color: black !important; }
+  .page-hero-tricolor { display: none; }
+  .badge-status, .badge-priority { border: 1px solid black; background: transparent !important; color: black !important; }
+}

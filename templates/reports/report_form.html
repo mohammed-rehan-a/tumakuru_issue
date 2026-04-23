@@ -194,6 +194,36 @@ document.getElementById('reportForm').addEventListener('submit', function() {
   btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
   btn.disabled = true;
 });
+
+// AI Auto-Categorization
+let aiSuggestTimeout;
+const titleInput = document.getElementById('id_title');
+const categorySelect = document.getElementById('id_category');
+
+if(titleInput && categorySelect) {
+  titleInput.addEventListener('input', function() {
+    clearTimeout(aiSuggestTimeout);
+    const text = this.value.trim();
+    if(text.length < 5) return;
+    
+    aiSuggestTimeout = setTimeout(() => {
+      fetch(`/reports/ai-suggest/?text=${encodeURIComponent(text)}`)
+        .then(response => response.json())
+        .then(data => {
+          if(data.category_id) {
+            categorySelect.value = data.category_id;
+            // Highlight the select to show it was auto-filled
+            categorySelect.style.borderColor = 'var(--gold-light)';
+            categorySelect.style.boxShadow = '0 0 0 0.25rem rgba(255, 193, 7, 0.25)';
+            setTimeout(() => {
+              categorySelect.style.borderColor = '';
+              categorySelect.style.boxShadow = '';
+            }, 2000);
+          }
+        });
+    }, 600); // Wait 600ms after typing stops
+  });
+}
 </script>
 {% endblock %}
 {% endblock %}

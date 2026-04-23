@@ -55,7 +55,18 @@ def dashboard(request):
         'certificates': profile.certificates_earned(),
     }
 
-    recent = my_reports[:5]
+    q = request.GET.get('q', '').strip()
+    if q:
+        from django.db.models import Q
+        recent = my_reports.filter(
+            Q(report_id__icontains=q) | 
+            Q(location__icontains=q) | 
+            Q(category__name__icontains=q) |
+            Q(title__icontains=q)
+        )
+    else:
+        recent = my_reports[:5]
+
     certificates = profile.certificates.all()
     progress = profile.progress_percentage
     points_needed = settings.POINTS_FOR_CERTIFICATE - (profile.points % settings.POINTS_FOR_CERTIFICATE)
@@ -340,3 +351,126 @@ def emergency_contacts(request):
         'govt_contacts': govt_contacts,
         'social_contacts': social_contacts,
     })
+
+def ai_suggest_category(request):
+    text = request.GET.get('text', '').lower()
+    if not text:
+        return JsonResponse({'category_id': None})
+    
+    mapping = {
+        'waste': ['garbage', 'trash', 'waste', 'dustbin', 'cleaning', 'dump'],
+        'road': ['pothole', 'road', 'asphalt', 'cracks', 'repair', 'broken'],
+        'street light': ['light', 'dark', 'bulb', 'street light', 'pole'],
+        'water': ['water', 'pipe', 'leak', 'drinking', 'supply', 'tap'],
+        'drainage': ['drain', 'sewage', 'clog', 'overflow', 'smell', 'block', 'gutter'],
+        'transport': ['bus', 'stand', 'station', 'transport'],
+    }
+    
+    best_match = None
+    max_score = 0
+    
+    for cat_name, keywords in mapping.items():
+        score = sum(1 for kw in keywords if kw in text)
+        if score > max_score:
+            max_score = score
+            best_match = cat_name
+            
+    if best_match:
+        category = IssueCategory.objects.filter(name__icontains=best_match).first()
+        if category:
+            return JsonResponse({'category_id': category.id, 'category_name': category.name})
+            
+    return JsonResponse({'category_id': None})
+
+def chatbot_response(request):
+    import re
+    from .models import IssueReport
+    
+    text = request.GET.get('text', '').strip()
+    if not text:
+        return JsonResponse({'reply': 'Please ask a question or provide your Report ID.'})
+        
+    # Check if the user provided a Report ID like TCC2024XXXXXX
+    match = re.search(r'TCC\d+', text, re.IGNORECASE)
+    if match:
+        report_id = match.group(0).upper()
+        report = IssueReport.objects.filter(report_id=report_id).first()
+        if report:
+            status_map = {
+                'pending': 'Pending Review',
+                'acknowledged': 'Acknowledged',
+                'in_progress': 'In Progress',
+                'resolved': 'Resolved',
+                'closed': 'Closed',
+                'rejected': 'Rejected'
+            }
+            status = status_map.get(report.status, report.status)
+            return JsonResponse({'reply': f'Report {report_id} "{report.title}" is currently: **{status}**.'})
+        else:
+            return JsonResponse({'reply': f'Sorry, I could not find a report with ID {report_id}.'})
+            
+    text_lower = text.lower()
+    if 'hello' in text_lower or 'hi' in text_lower:
+        return JsonResponse({'reply': 'Hello! I am the Tumakuru Civic Bot. How can I help you today? You can ask me about the status of your report by typing its ID.'})
+    if 'point' in text_lower or 'reward' in text_lower:
+        return JsonResponse({'reply': 'You earn 5 points for every valid report. Reach 100 points to get a Best Citizen Certificate!'})
+        
+    return JsonResponse({'reply': 'I am a simple bot. To check your report status, please provide the Report ID (e.g., TCC2024123456). For other issues, please contact the helpline.'})
+
+@login_required
+def analytics_dashboard(request):
+    if not request.user.is_staff:
+        messages.error(request, 'Access denied. You must be an admin to view analytics.')
+        return redirect('home')
+        
+    # Status distribution
+    status_counts = IssueReport.objects.values('status').annotate(count=Count('id'))
+    status_labels = []
+    status_data = []
+    for item in status_counts:
+        status_labels.append(item['status'].title().replace('_', ' '))
+        status_data.append(item['count'])
+        
+    # Categories distribution
+    category_counts = IssueReport.objects.values('category__name').annotate(count=Count('id')).order_by('-count')[:5]
+    cat_labels = [c['category__name'] for c in category_counts if c['category__name']]
+    cat_data = [c['count'] for c in category_counts if c['category__name']]
+    
+    # Simple Monthly Trends (assuming current year)
+    import datetime
+    current_year = datetime.datetime.now().year
+    monthly_data = []
+    for m in range(1, 13):
+        monthly_data.append(IssueReport.objects.filter(created_at__year=current_year, created_at__month=m).count())
+        
+    context = {
+        'status_labels': status_labels,
+        'status_data': status_data,
+        'cat_labels': cat_labels,
+        'cat_data': cat_data,
+        'monthly_data': monthly_data,
+        'year': current_year,
+    }
+    
+    return render(request, 'reports/analytics.html', context)
+
+def volunteer_list(request):
+    from .models import VolunteerTask, VolunteerLog
+    tasks = VolunteerTask.objects.filter(is_active=True).order_by('-created_at')
+    user_tasks = []
+    if request.user.is_authenticated:
+        user_tasks = VolunteerLog.objects.filter(citizen=request.user).values_list('task_id', flat=True)
+        
+    return render(request, 'reports/volunteer_list.html', {'tasks': tasks, 'user_tasks': user_tasks})
+
+@login_required
+def volunteer_signup(request, task_id):
+    from .models import VolunteerTask, VolunteerLog
+    task = get_object_or_404(VolunteerTask, id=task_id)
+    log, created = VolunteerLog.objects.get_or_create(task=task, citizen=request.user)
+    if created:
+        messages.success(request, f'Thank you for volunteering for "{task.title}". You will earn {task.points_reward} points upon completion.')
+    else:
+        messages.info(request, f'You are already signed up for "{task.title}".')
+    return redirect('volunteer_list')
+
