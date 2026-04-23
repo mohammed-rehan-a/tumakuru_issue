@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% block title %}Verify OTP{% endblock %}
+
+{% block content %}
+<div style="min-height:80vh; display:flex; align-items:center; background:var(--off-white); padding:48px 0">
+  <div class="container px-4">
+    <div class="row justify-content-center">
+      <div class="col-lg-5 col-md-7">
+
+        <div style="text-align:center; margin-bottom:32px">
+          <div style="width:64px; height:64px; background:linear-gradient(135deg,var(--saffron),#ff9800); border-radius:var(--radius); display:flex; align-items:center; justify-content:center; margin:0 auto 16px; font-size:28px; color:white">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <h2 style="font-family:'Playfair Display',serif; margin-bottom:6px">Verify OTP</h2>
+          <p style="color:var(--gray-600); font-size:14px">We've sent a 6-digit code to {{ phone|slice:":2" }}******{{ phone|slice:"-2:" }}</p>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-header">
+            <div style="display:flex; align-items:center; gap:10px">
+              <i class="fas fa-key" style="font-size:18px"></i>
+              <span style="font-weight:700">Enter OTP</span>
+            </div>
+          </div>
+          <div class="form-section-body text-center">
+            <form method="post">
+              {% csrf_token %}
+              <div class="mb-4">
+                <input type="text" name="token" class="form-control text-center mx-auto" style="font-size: 24px; letter-spacing: 12px; font-weight: bold; width: 80%;" placeholder="------" required maxlength="6" autocomplete="one-time-code">
+              </div>
+              <button type="submit" class="btn-primary-civic w-100" style="justify-content:center; border-radius:var(--radius-sm); padding:13px">
+                <i class="fas fa-check-circle me-2"></i> Verify & Login
+              </button>
+            </form>
+            <div style="text-align:center; margin-top:20px; font-size:14px; color:var(--gray-600)">
+              Didn't receive code? <a href="{% url 'request_otp' %}" style="color:var(--saffron); font-weight:600; text-decoration:none">Resend OTP</a>
+            </div>
+            <div style="text-align:center; margin-top:10px; font-size:13px;">
+              <a href="{% url 'login' %}" style="color:var(--gray-600); text-decoration:none"><i class="fas fa-arrow-left me-1"></i> Use Password Instead</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

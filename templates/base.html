@@ -1,4 +1,4 @@
-{% load static %}
+{% load static i18n %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -169,21 +169,24 @@
       <div class="collapse navbar-collapse" id="mainNav">
         <ul class="navbar-nav ms-auto align-items-center gap-1">
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'home' %}"><i class="fas fa-home me-1"></i> Home</a>
+            <a class="nav-link" href="{% url 'home' %}"><i class="fas fa-home me-1"></i> {% trans "Home" %}</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'report_list' %}"><i class="fas fa-map-marked-alt me-1"></i> All Issues</a>
+            <a class="nav-link" href="{% url 'report_list' %}"><i class="fas fa-map-marked-alt me-1"></i> {% trans "All Issues" %}</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'leaderboard' %}"><i class="fas fa-trophy me-1"></i> Leaderboard</a>
+            <a class="nav-link" href="{% url 'leaderboard' %}"><i class="fas fa-trophy me-1"></i> {% trans "Leaderboard" %}</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'statistics' %}"><i class="fas fa-chart-pie me-1"></i> {% trans "Statistics" %}</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="{% url 'volunteer_list' %}"><i class="fas fa-hands-helping me-1"></i>
-              Volunteer</a>
+              {% trans "Volunteer" %}</a>
           </li>
           <li class="nav-item">
             <a class="nav-link btn-emergency-nav" href="{% url 'emergency' %}">
-              <i class="fas fa-phone-alt me-1"></i> Emergency
+              <i class="fas fa-phone-alt me-1"></i> {% trans "Emergency" %}
             </a>
           </li>
           <li class="nav-item">
@@ -192,13 +195,28 @@
               <i class="fas fa-moon"></i>
             </button>
           </li>
+          <li class="nav-item">
+            <form action="{% url 'set_language' %}" method="post" class="d-inline">
+              {% csrf_token %}
+              <input name="next" type="hidden" value="{{ redirect_to }}">
+              <select name="language" onchange="this.form.submit()" class="form-select form-select-sm" style="width: auto; display: inline-block; background-color: var(--navy); color: white; border: none;">
+                {% get_current_language as LANGUAGE_CODE %}
+                {% get_available_languages as LANGUAGES %}
+                {% for lang in LANGUAGES %}
+                  <option value="{{ lang.0 }}" {% if lang.0 == LANGUAGE_CODE %}selected{% endif %}>
+                    {{ lang.1 }}
+                  </option>
+                {% endfor %}
+              </select>
+            </form>
+          </li>
           {% if user.is_authenticated %}
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt me-1"></i> Dashboard</a>
+            <a class="nav-link" href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt me-1"></i> {% trans "Dashboard" %}</a>
           </li>
           <li class="nav-item">
             <a class="nav-link btn-submit-nav" href="{% url 'submit_report' %}">
-              <i class="fas fa-plus-circle me-1"></i> Report Issue
+              <i class="fas fa-plus-circle me-1"></i> {% trans "Report Issue" %}
             </a>
           </li>
           <li class="nav-item dropdown">

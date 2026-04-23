@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block title %}Ward-wise Statistics Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <div class="container px-4">
+    <nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li><li class="breadcrumb-item active">Statistics</li></ol></nav>
+    <h1 class="mt-2">Ward-wise Statistics Dashboard</h1>
+    <p style="opacity:.75; margin:0">Track the number of reported and resolved issues across all 35 wards of Tumakuru.</p>
+  </div>
+  <div class="page-hero-tricolor"></div>
+</div>
+
+<div class="container px-4 py-5">
+  <div class="row mb-4">
+    <div class="col-md-6 mb-3">
+      <div class="card shadow-sm border-0" style="background: linear-gradient(135deg, var(--navy), var(--navy-mid)); color: white;">
+        <div class="card-body p-4 text-center">
+          <div style="font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.7);">Total Issues Reported</div>
+          <div style="font-size: 3rem; font-weight: 700; color: var(--gold-light);">{{ total_issues }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 mb-3">
+      <div class="card shadow-sm border-0" style="background: linear-gradient(135deg, #2E8B57, #3CB371); color: white;">
+        <div class="card-body p-4 text-center">
+          <div style="font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.8);">Total Issues Resolved</div>
+          <div style="font-size: 3rem; font-weight: 700;">{{ total_resolved }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+      <h4 class="mb-4 text-navy fw-bold"><i class="fas fa-chart-bar me-2 text-saffron"></i> Issues by Ward</h4>
+      <div style="position: relative; height: 60vh; min-height: 400px;">
+        <canvas id="wardChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var ctx = document.getElementById('wardChart').getContext('2d');
+    var chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ labels|safe }},
+            datasets: [
+                {
+                    label: 'Total Reports',
+                    data: {{ total_data|safe }},
+                    backgroundColor: 'rgba(33, 37, 41, 0.7)',
+                    borderColor: 'rgba(33, 37, 41, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Resolved Reports',
+                    data: {{ resolved_data|safe }},
+                    backgroundColor: 'rgba(76, 175, 80, 0.8)',
+                    borderColor: 'rgba(76, 175, 80, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

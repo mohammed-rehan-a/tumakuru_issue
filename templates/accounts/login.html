@@ -39,6 +39,12 @@
               </button>
             </form>
             <div style="text-align:center; margin-top:20px; font-size:14px; color:var(--gray-600)">
+              <div class="mb-3">
+                <span class="text-muted">OR</span>
+              </div>
+              <a href="{% url 'request_otp' %}" class="btn btn-outline-secondary w-100 mb-3" style="border-radius:var(--radius-sm); padding:10px">
+                <i class="fas fa-mobile-alt me-1"></i> Login with OTP
+              </a>
               Don't have an account? <a href="{% url 'register' %}" style="color:var(--saffron); font-weight:600; text-decoration:none">Register as Citizen</a>
             </div>
           </div>

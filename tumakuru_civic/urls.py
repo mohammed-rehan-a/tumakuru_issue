@@ -20,7 +20,9 @@ urlpatterns = [
     path('reports/', include('reports.urls')),
     path('leaderboard/', report_views.leaderboard, name='leaderboard'),
     path('emergency/', report_views.emergency_contacts, name='emergency'),
+    path('statistics/', report_views.ward_statistics, name='statistics'),
     path('api/v1/', include(router.urls)),
+    path('i18n/', include('django.conf.urls.i18n')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 admin.site.site_header = "Tumakuru City Corporation — Admin"

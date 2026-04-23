@@ -71,6 +71,52 @@
       </div>
       {% endif %}
 
+      {% endif %}
+
+      <!-- Citizen Feedback Section -->
+      {% if report.status == 'resolved' %}
+      <div class="detail-card mb-4" style="border: 2px solid var(--gold-light);">
+        <div class="detail-header" style="background: linear-gradient(to right, var(--navy), var(--navy-mid)); color: white;">
+          <h5 class="mb-0"><i class="fas fa-star me-2 text-saffron"></i>Resolution Feedback</h5>
+        </div>
+        <div class="detail-body text-center p-4">
+          {% if report.feedback_exists %}
+            <h6 class="fw-bold mb-3">Citizen Rating</h6>
+            <div class="mb-3" style="font-size: 24px; color: var(--gold-light);">
+              {% for i in '12345'|make_list %}
+                {% if forloop.counter <= report.feedback.rating %}
+                  <i class="fas fa-star"></i>
+                {% else %}
+                  <i class="far fa-star"></i>
+                {% endif %}
+              {% endfor %}
+            </div>
+            {% if report.feedback.comment %}
+              <p class="fst-italic text-muted">"{{ report.feedback.comment }}"</p>
+            {% endif %}
+            <div class="small text-muted mt-2">Feedback provided on {{ report.feedback.created_at|date:"d M Y" }}</div>
+          {% elif user == report.citizen %}
+            <h6 class="fw-bold mb-2">How was the resolution of this issue?</h6>
+            <p class="text-muted small mb-4">Your feedback helps us improve our services.</p>
+            <form action="{% url 'submit_feedback' report.pk %}" method="post">
+              {% csrf_token %}
+              <div class="rating-input mb-3" style="font-size: 32px; color: #ddd; cursor: pointer; display: flex; justify-content: center; flex-direction: row-reverse;">
+                <input type="radio" name="rating" id="star5" value="5" class="d-none" required><label for="star5" class="star-label"><i class="fas fa-star"></i></label>
+                <input type="radio" name="rating" id="star4" value="4" class="d-none"><label for="star4" class="star-label"><i class="fas fa-star"></i></label>
+                <input type="radio" name="rating" id="star3" value="3" class="d-none"><label for="star3" class="star-label"><i class="fas fa-star"></i></label>
+                <input type="radio" name="rating" id="star2" value="2" class="d-none"><label for="star2" class="star-label"><i class="fas fa-star"></i></label>
+                <input type="radio" name="rating" id="star1" value="1" class="d-none"><label for="star1" class="star-label"><i class="fas fa-star"></i></label>
+              </div>
+              <textarea name="comment" class="form-control mb-3" rows="2" placeholder="Any comments on the work done? (Optional)"></textarea>
+              <button type="submit" class="btn btn-warning px-4 fw-bold">Submit Feedback</button>
+            </form>
+          {% else %}
+            <div class="text-muted"><i class="fas fa-clock mb-2" style="font-size:24px;"></i><br>Awaiting citizen feedback.</div>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+
       <!-- Comments -->
       <div class="detail-card">
         <div class="detail-header">
@@ -185,6 +231,18 @@
         </div>
       </div>
 
+      <!-- Map Integration -->
+      {% if report.latitude and report.longitude %}
+      <div class="detail-card mb-4 d-print-none">
+        <div class="detail-header">
+          <h6 class="mb-0 fw-700"><i class="fas fa-map-marked-alt me-2 text-saffron"></i>Map Location</h6>
+        </div>
+        <div class="detail-body p-0">
+          <div id="reportMap" style="height: 250px; border-radius: 0 0 var(--radius-sm) var(--radius-sm); z-index: 1;"></div>
+        </div>
+      </div>
+      {% endif %}
+
       <!-- Action Buttons (Print & Share) -->
       <div class="detail-card mb-4 d-print-none">
         <div class="detail-body p-3">
@@ -239,6 +297,8 @@
 </div>
 
 {% block extra_js %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script>
 function upvoteReport(pk) {
   fetch(`/reports/${pk}/upvote/`, {
@@ -258,6 +318,64 @@ function copyReportLink() {
     alert("Report link copied to clipboard!");
   });
 }
+
+// Star Rating hover logic
+document.querySelectorAll('.star-label').forEach(label => {
+  label.addEventListener('mouseenter', function() {
+    let current = this;
+    while (current) {
+      current.style.color = 'var(--gold-light)';
+      current = current.nextElementSibling;
+    }
+  });
+  label.addEventListener('mouseleave', function() {
+    let current = this;
+    while (current) {
+      if(!document.getElementById(current.getAttribute('for')).checked) {
+         current.style.color = '#ddd';
+      }
+      current = current.nextElementSibling;
+    }
+    // Restore checked ones
+    let checked = document.querySelector('input[name="rating"]:checked');
+    if(checked) {
+      let lbl = document.querySelector(`label[for="${checked.id}"]`);
+      while(lbl) {
+        lbl.style.color = 'var(--gold-light)';
+        lbl = lbl.nextElementSibling;
+      }
+    }
+  });
+  label.addEventListener('click', function() {
+    setTimeout(() => {
+      let current = this;
+      while (current) {
+        current.style.color = 'var(--gold-light)';
+        current = current.nextElementSibling;
+      }
+      let prev = this.previousElementSibling;
+      while(prev) {
+        if(prev.tagName === 'LABEL') prev.style.color = '#ddd';
+        prev = prev.previousElementSibling;
+      }
+    }, 10);
+  });
+});
+
+
+{% if report.latitude and report.longitude %}
+document.addEventListener("DOMContentLoaded", function() {
+  var lat = {{ report.latitude }};
+  var lng = {{ report.longitude }};
+  var map = L.map('reportMap').setView([lat, lng], 15);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  }).addTo(map);
+  L.marker([lat, lng]).addTo(map)
+    .bindPopup('<b>{{ report.title|escapejs }}</b><br>{{ report.location|escapejs }}').openPopup();
+});
+{% endif %}
 </script>
 {% endblock %}
 {% endblock %}

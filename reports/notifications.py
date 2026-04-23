@@ -250,3 +250,87 @@ def send_certificate_notification(profile, certificate):
     """Send certificate congratulations via Email + SMS."""
     _run_in_thread(_send_certificate_email, profile, certificate)
     _run_in_thread(_send_certificate_sms,   profile, certificate)
+
+
+# ─────────────────────────────────────────────────────────
+# STATUS UPDATE EMAIL & SMS
+# ─────────────────────────────────────────────────────────
+
+def _send_status_email(report, profile):
+    """Send an email when report status changes to In Progress or Resolved."""
+    try:
+        user = profile.user
+        email = user.email
+        if not email:
+            return
+
+        citizen_name = user.get_full_name() or user.username
+        status_display = report.get_status_display()
+        dashboard_url = getattr(settings, 'SITE_URL', 'http://127.0.0.1:8000') + '/dashboard/'
+
+        subject = f"🔔 Status Update: {status_display} — Report [{report.report_id}]"
+        from_email = settings.DEFAULT_FROM_EMAIL
+
+        text_body = (
+            f"Dear {citizen_name},\n\n"
+            f"The status of your civic issue report has been updated to: {status_display}.\n\n"
+            f"Report ID : {report.report_id}\n"
+            f"Issue     : {report.title}\n\n"
+        )
+        
+        if report.status == 'resolved':
+            text_body += f"Resolution Remarks: {report.admin_remarks or 'Issue has been successfully resolved.'}\n\n"
+            text_body += f"Please login to your dashboard to provide feedback: {dashboard_url}\n\n"
+        else:
+            text_body += f"Our team is currently working on it. Track here: {dashboard_url}\n\n"
+            
+        text_body += (
+            f"Thank you for making Tumakuru better!\n"
+            f"Tumakuru City Corporation\n"
+        )
+
+        msg = EmailMultiAlternatives(subject, text_body, from_email, [email])
+        msg.send(fail_silently=True)
+        logger.info("✉️  Status update email sent to %s", email)
+
+    except Exception as exc:
+        logger.error("Status update email failed for report %s: %s", report.report_id, exc)
+
+
+def _send_status_sms(report, profile):
+    """Send SMS when report status changes."""
+    try:
+        api_key = getattr(settings, 'FAST2SMS_API_KEY', '')
+        if not api_key or not profile.phone:
+            return
+
+        phone = ''.join(filter(str.isdigit, profile.phone))
+        if phone.startswith('91') and len(phone) == 12:
+            phone = phone[2:]
+        if len(phone) != 10:
+            return
+
+        citizen_name = profile.user.get_full_name() or profile.user.username
+        status_display = report.get_status_display()
+        
+        message = (
+            f"Update {citizen_name}: Your report [{report.report_id}] "
+            f"status is now {status_display}. "
+            f"Track at: tumakuru.gov.in/dashboard -TCC"
+        )
+
+        url = "https://www.fast2sms.com/dev/bulkV2"
+        headers = {"authorization": api_key, "Content-Type": "application/json"}
+        payload = {"route": "q", "message": message, "language": "english", "flash": 0, "numbers": phone}
+        requests.post(url, json=payload, headers=headers, timeout=10)
+        logger.info("📱 Status update SMS sent to %s", phone)
+
+    except Exception as exc:
+        logger.error("Status update SMS failed for report %s: %s", report.report_id, exc)
+
+
+def send_status_update_notification(report, profile):
+    """Send status update via Email + SMS."""
+    _run_in_thread(_send_status_email, report, profile)
+    _run_in_thread(_send_status_sms,   report, profile)
+

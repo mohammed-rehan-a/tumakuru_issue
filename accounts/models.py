@@ -98,3 +98,22 @@ def create_profile(sender, instance, created, **kwargs):
 def save_profile(sender, instance, **kwargs):
     if hasattr(instance, 'profile'):
         instance.profile.save()
+
+class OTPToken(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='otp_tokens')
+    token = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_used = models.BooleanField(default=False)
+
+    def is_valid(self):
+        from django.utils import timezone
+        import datetime
+        if self.is_used:
+            return False
+        # OTP valid for 10 minutes
+        if timezone.now() > self.created_at + datetime.timedelta(minutes=10):
+            return False
+        return True
+
+    def __str__(self):
+        return f"OTP for {self.user.username}"

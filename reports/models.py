@@ -80,13 +80,32 @@ class IssueReport(models.Model):
         return f"[{self.report_id}] {self.title}"
 
     def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        old_status = None
+        
+        if not is_new:
+            try:
+                old_status = IssueReport.objects.get(pk=self.pk).status
+            except IssueReport.DoesNotExist:
+                pass
+
         if not self.report_id:
             import random, string
             prefix = "TCC"
             year = timezone.now().year
             random_part = ''.join(random.choices(string.digits, k=6))
             self.report_id = f"{prefix}{year}{random_part}"
+            
         super().save(*args, **kwargs)
+        
+        # Trigger notifications if status changed to in_progress or resolved
+        if not is_new and old_status and old_status != self.status:
+            if self.status in ['in_progress', 'resolved']:
+                try:
+                    from reports.notifications import send_status_update_notification
+                    send_status_update_notification(self, self.citizen.profile)
+                except Exception as e:
+                    pass  # Fail gracefully if notification fails
 
     def get_status_color(self):
         colors = {
@@ -107,6 +126,10 @@ class IssueReport(models.Model):
             'critical': '#F44336',
         }
         return colors.get(self.priority, '#999')
+
+    @property
+    def feedback_exists(self):
+        return hasattr(self, 'feedback')
 
 
 class IssueComment(models.Model):
@@ -150,3 +173,16 @@ class VolunteerLog(models.Model):
     
     class Meta:
         unique_together = ('task', 'citizen')
+
+class ReportFeedback(models.Model):
+    report = models.OneToOneField(IssueReport, on_delete=models.CASCADE, related_name='feedback')
+    rating = models.IntegerField(choices=[(i, str(i)) for i in range(1, 6)])
+    comment = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Report Feedback"
+        verbose_name_plural = "Report Feedbacks"
+
+    def __str__(self):
+        return f"Feedback for {self.report.report_id} - {self.rating} Stars"

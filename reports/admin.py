@@ -66,15 +66,22 @@ class IssueReportAdmin(admin.ModelAdmin):
 
     def mark_resolved(self, request, queryset):
         from django.utils import timezone
-        queryset.update(status='resolved', resolved_at=timezone.now())
+        for report in queryset:
+            report.status = 'resolved'
+            report.resolved_at = timezone.now()
+            report.save()
     mark_resolved.short_description = "Mark as Resolved"
 
     def mark_in_progress(self, request, queryset):
-        queryset.update(status='in_progress')
+        for report in queryset:
+            report.status = 'in_progress'
+            report.save()
     mark_in_progress.short_description = "Mark as In Progress"
 
     def mark_acknowledged(self, request, queryset):
-        queryset.update(status='acknowledged')
+        for report in queryset:
+            report.status = 'acknowledged'
+            report.save()
     mark_acknowledged.short_description = "Mark as Acknowledged"
 
 

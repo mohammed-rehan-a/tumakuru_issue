@@ -42,6 +42,38 @@ def home(request):
 
 
 @login_required
+def submit_feedback(request, pk):
+    report = get_object_or_404(IssueReport, pk=pk, citizen=request.user)
+    if report.status != 'resolved':
+        messages.error(request, 'You can only provide feedback for resolved reports.')
+        return redirect('report_detail', pk=pk)
+        
+    if hasattr(report, 'feedback'):
+        messages.info(request, 'You have already submitted feedback for this report.')
+        return redirect('report_detail', pk=pk)
+
+    if request.method == 'POST':
+        rating = request.POST.get('rating')
+        comment = request.POST.get('comment', '')
+        
+        try:
+            rating = int(rating)
+            if rating < 1 or rating > 5:
+                raise ValueError
+                
+            from .models import ReportFeedback
+            ReportFeedback.objects.create(
+                report=report,
+                rating=rating,
+                comment=comment
+            )
+            messages.success(request, 'Thank you for your feedback!')
+        except (TypeError, ValueError):
+            messages.error(request, 'Invalid rating provided.')
+            
+    return redirect('report_detail', pk=pk)
+
+@login_required
 def dashboard(request):
     profile = request.user.profile
     my_reports = IssueReport.objects.filter(citizen=request.user).order_by('-created_at')
@@ -473,4 +505,43 @@ def volunteer_signup(request, task_id):
     else:
         messages.info(request, f'You are already signed up for "{task.title}".')
     return redirect('volunteer_list')
+
+def ward_statistics(request):
+    """Public page showing bar chart of issues per ward."""
+    # Get total issues per ward
+    ward_counts = IssueReport.objects.values('ward_number').annotate(
+        total=Count('id'),
+        resolved=Count('id', filter=Q(status='resolved')),
+        in_progress=Count('id', filter=Q(status__in=['in_progress', 'acknowledged'])),
+        pending=Count('id', filter=Q(status='pending'))
+    ).order_by('ward_number')
+    
+    # We want to format this for Chart.js
+    labels = []
+    total_data = []
+    resolved_data = []
+    
+    # Pre-populate all 35 wards
+    ward_dict = {str(i): {'total': 0, 'resolved': 0} for i in range(1, 36)}
+    
+    for item in ward_counts:
+        w = str(item['ward_number'])
+        if w in ward_dict:
+            ward_dict[w]['total'] = item['total']
+            ward_dict[w]['resolved'] = item['resolved']
+            
+    for i in range(1, 36):
+        labels.append(f"Ward {i}")
+        total_data.append(ward_dict[str(i)]['total'])
+        resolved_data.append(ward_dict[str(i)]['resolved'])
+        
+    context = {
+        'labels': labels,
+        'total_data': total_data,
+        'resolved_data': resolved_data,
+        'total_issues': sum(total_data),
+        'total_resolved': sum(resolved_data),
+    }
+    
+    return render(request, 'reports/statistics.html', context)
 

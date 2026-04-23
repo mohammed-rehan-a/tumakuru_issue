@@ -9,6 +9,7 @@ class IssueReportForm(forms.ModelForm):
             'title', 'category', 'description',
             'location', 'ward_number', 'landmark',
             'priority', 'image', 'image2',
+            'latitude', 'longitude'
         ]
         widgets = {
             'title': forms.TextInput(attrs={

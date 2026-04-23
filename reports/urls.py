@@ -6,6 +6,7 @@ urlpatterns = [
     path('submit/', views.submit_report, name='submit_report'),
     path('<int:pk>/', views.report_detail, name='report_detail'),
     path('<int:pk>/upvote/', views.upvote_report, name='upvote_report'),
+    path('<int:pk>/feedback/', views.submit_feedback, name='submit_feedback'),
     path('my-reports/', views.my_reports, name='my_reports'),
     path('certificate/<int:pk>/', views.certificate_detail, name='certificate_detail'),
     path('certificate/<int:pk>/download/', views.download_certificate, name='download_certificate'),

@@ -100,6 +100,17 @@
                 {{ form.landmark|add_class:"form-control" }}
                 <div class="form-text">Example: "Near SBM Bank", "Opposite Government School"</div>
               </div>
+              
+              <!-- Map Picker -->
+              <div class="col-12 mt-4">
+                <label class="form-label fw-bold"><i class="fas fa-map-marked-alt text-saffron me-2"></i>Pin Location on Map <span class="text-muted fw-normal small">(Optional)</span></label>
+                <div class="form-text mb-2">Drag the pin or click on the map to mark the exact location of the issue.</div>
+                <div id="pickerMap" style="height: 250px; border-radius: var(--radius-sm); border: 1px solid var(--gray-300); z-index: 1;"></div>
+                
+                <!-- Hidden inputs for coordinates -->
+                <input type="hidden" name="latitude" id="id_latitude" value="{% if form.latitude.value %}{{ form.latitude.value }}{% endif %}">
+                <input type="hidden" name="longitude" id="id_longitude" value="{% if form.longitude.value %}{{ form.longitude.value }}{% endif %}">
+              </div>
             </div>
           </div>
         </div>
@@ -176,6 +187,8 @@
 </style>
 
 {% block extra_js %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script>
 // File input labels
 ['{{ form.image.id_for_label }}', '{{ form.image2.id_for_label }}'].forEach(id => {
@@ -224,6 +237,44 @@ if(titleInput && categorySelect) {
     }, 600); // Wait 600ms after typing stops
   });
 }
+
+// Map Picker Logic
+document.addEventListener("DOMContentLoaded", function() {
+  // Default to Tumakuru City Center
+  var defaultLat = 13.3379;
+  var defaultLng = 77.1173;
+  
+  var latInput = document.getElementById('id_latitude');
+  var lngInput = document.getElementById('id_longitude');
+  
+  var initialLat = latInput.value ? parseFloat(latInput.value) : defaultLat;
+  var initialLng = lngInput.value ? parseFloat(lngInput.value) : defaultLng;
+
+  var map = L.map('pickerMap').setView([initialLat, initialLng], 14);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  }).addTo(map);
+
+  var marker = L.marker([initialLat, initialLng], {draggable: true}).addTo(map);
+
+  // If there wasn't a previous value, let's wait for user to click/drag
+  if(!latInput.value) {
+      marker.bindPopup("Drag me to the issue location").openPopup();
+  }
+
+  marker.on('dragend', function(e) {
+    var position = marker.getLatLng();
+    latInput.value = position.lat.toFixed(6);
+    lngInput.value = position.lng.toFixed(6);
+  });
+
+  map.on('click', function(e) {
+    marker.setLatLng(e.latlng);
+    latInput.value = e.latlng.lat.toFixed(6);
+    lngInput.value = e.latlng.lng.toFixed(6);
+  });
+});
 </script>
 {% endblock %}
 {% endblock %}
