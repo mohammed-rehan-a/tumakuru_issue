@@ -173,3 +173,8 @@ LOGGING = {
         },
     },
 }
+
+AUTHENTICATION_BACKENDS = [
+    'accounts.backends.CustomAuthBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]

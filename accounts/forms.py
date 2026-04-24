@@ -43,7 +43,7 @@ class CitizenRegistrationForm(UserCreationForm):
 
 
 class CitizenLoginForm(AuthenticationForm):
-    username = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Username'}))
+    username = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Username, Email or Phone Number'}))
     password = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Password'}))
 
 
