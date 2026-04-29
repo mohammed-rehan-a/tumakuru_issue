@@ -156,7 +156,7 @@ SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY', 'VBA79WJ95WPEXVWY2U1YE523')
 # ─────────────────────────────────────────────────
 # SITE URL (for links in emails)
 # ─────────────────────────────────────────────────
-SITE_URL = os.getenv('SITE_URL', 'http://127.0.0.1:8000')   # Use environment variable for production
+SITE_URL = ('https://tumakuru-issue-1.onrender.com', 'http://127.0.0.1:8000')   # Use environment variable for production
 
 # ─────────────────────────────────────────────────
 # LOGGING
