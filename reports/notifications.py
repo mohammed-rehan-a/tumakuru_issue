@@ -44,18 +44,19 @@ def _points_to_cert(total_points, threshold=100):
 # ─────────────────────────────────────────────────────────
 
 def _send_email(report, profile):
-    """Send the HTML thank-you email. Called in a thread."""
+    """Send the HTML thank-you email. Updated for Render compatibility."""
     try:
         user = profile.user
         email = user.email
         if not email:
-            logger.info("No email for user %s — skipping email.", user.username)
+            logger.info("No email for user %s - skipping email.", user.username)
             return
 
         citizen_name = user.get_full_name() or user.username
         total_points = profile.points
         threshold    = getattr(settings, 'POINTS_FOR_CERTIFICATE', 100)
         points_earned = getattr(settings, 'POINTS_PER_REPORT', 5)
+        dashboard_url = getattr(settings, 'SITE_URL', 'http://127.0.0.1:8000') + '/dashboard/'
 
         context = {
             'citizen_name'   : citizen_name,
@@ -67,11 +68,10 @@ def _send_email(report, profile):
             'total_points'   : total_points,
             'points_to_cert' : _points_to_cert(total_points, threshold),
             'progress_percent': _progress_percent(total_points, threshold),
-            'dashboard_url'  : getattr(settings, 'SITE_URL', 'http://127.0.0.1:8000') + '/dashboard/',
+            'dashboard_url'  : dashboard_url,
         }
 
-        subject    = f"✅ Report Received [{report.report_id}] — Tumakuru City Corporation"
-        from_email = settings.DEFAULT_FROM_EMAIL
+        subject    = f" Report Received [{report.report_id}] - Tumakuru City Corporation"
         text_body  = (
             f"Dear {citizen_name},\n\n"
             f"Your civic issue report has been received.\n"
@@ -79,7 +79,7 @@ def _send_email(report, profile):
             f"Issue     : {report.title}\n"
             f"Ward      : {report.ward_number}\n"
             f"Points    : +{points_earned} (Total: {total_points})\n\n"
-            f"Track your report: {context['dashboard_url']}\n\n"
+            f"Track your report: {dashboard_url}\n\n"
             f"Thank you for making Tumakuru better!\n"
             f"Tumakuru City Corporation\n"
             f"Helpline: 1800-425-0006"
@@ -87,14 +87,19 @@ def _send_email(report, profile):
 
         html_body = render_to_string('emails/thank_you_report.html', context)
 
-        msg = EmailMultiAlternatives(subject, text_body, from_email, [email])
-        msg.attach_alternative(html_body, "text/html")
-        msg.send(fail_silently=False)
-
-        logger.info("✉️  Thank-you email sent to %s", email)
+        # Try robust email service first
+        from .email_service import send_email_robust
+        success = send_email_robust(email, subject, text_body, html_body)
+        
+        if success:
+            logger.info(" Thank-you email sent to %s", email)
+        else:
+            logger.error("All email methods failed for report %s", report.report_id)
 
     except Exception as exc:
         logger.error("Email send failed for report %s: %s", report.report_id, exc)
+        import traceback
+        traceback.print_exc()
 
 
 # ─────────────────────────────────────────────────────────
@@ -168,11 +173,14 @@ def _send_sms(report, profile):
 def send_report_thankyou(report, profile):
     """
     Send thank-you Email + SMS after a report is submitted.
-    Reverted to asynchronous to avoid 502 Gateway Timeouts on Render.
+    Made synchronous for debugging on Render.
     """
-    _run_in_thread(_send_email, report, profile)
-    _run_in_thread(_send_sms,   report, profile)
-    logger.info("Notification threads launched for report %s", report.report_id)
+    try:
+        _send_email(report, profile)
+        _send_sms(report, profile)
+        logger.info("Notifications sent for report %s", report.report_id)
+    except Exception as e:
+        logger.error("Notification failed for report %s: %s", report.report_id, e)
 
 # ─────────────────────────────────────────────────────────
 # CERTIFICATE EMAIL

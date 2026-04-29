@@ -129,16 +129,16 @@ CITY_STATE = "Karnataka"
 # Step 3: Create App Password for "Mail" → copy 16-char password
 # Step 4: Paste below
 
-EMAIL_BACKEND        = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND        = 'django.core.mail.backends.console.EmailBackend' if os.getenv('EMAIL_DEBUG_CONSOLE', 'False') == 'True' else 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST           = 'smtp.gmail.com'
 EMAIL_PORT           = 587
 EMAIL_USE_TLS        = True
-EMAIL_HOST_USER      = 'tumakurucity@gmail.com'      # ← Change this
-EMAIL_HOST_PASSWORD  = 'wotz lymy yjzb opxx'        # ← 16-char App Password
-DEFAULT_FROM_EMAIL   = 'Tumakuru City Corporation <tumakurucity@gmail.com>'
+EMAIL_HOST_USER      = os.getenv('EMAIL_HOST_USER', 'tumakurucity@gmail.com')      # ← Change this
+EMAIL_HOST_PASSWORD  = os.getenv('EMAIL_HOST_PASSWORD', 'wotz lymy yjzb opxx')    # ← 16-char App Password
+DEFAULT_FROM_EMAIL   = os.getenv('DEFAULT_FROM_EMAIL', 'Tumakuru City Corporation <tumakurucity@gmail.com>')
 
 # Set to True to test without sending real emails (prints to console)
-EMAIL_DEBUG_CONSOLE  = False   # Set True during development
+EMAIL_DEBUG_CONSOLE  = os.getenv('EMAIL_DEBUG_CONSOLE', 'False') == 'True'   # Set True during development
 
 # ─────────────────────────────────────────────────
 # SMS CONFIGURATION (Fast2SMS — Free Indian API)
@@ -147,12 +147,15 @@ EMAIL_DEBUG_CONSOLE  = False   # Set True during development
 # 2. Go to Dev API → copy your API key
 # 3. Paste it below
 
-FAST2SMS_API_KEY = 'Nlgj9dSIsM61DEtyzTeZxU0P3VcYCv2GX8OwJbhkrnoqKpQL7moyz3nbs05kZep2EV8hOKifTa4dtqMW'   # ← Change this
+FAST2SMS_API_KEY = os.getenv('FAST2SMS_API_KEY', 'Nlgj9dSIsM61DEtyzTeZxU0P3VcYCv2GX8OwJbhkrnoqKpQL7moyz3nbs05kZep2EV8hOKifTa4dtqMW')   # ← Change this
+
+# SendGrid API Configuration (for reliable email delivery on Render)
+SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY', 'VBA79WJ95WPEXVWY2U1YE523')
 
 # ─────────────────────────────────────────────────
 # SITE URL (for links in emails)
 # ─────────────────────────────────────────────────
-SITE_URL = 'http://127.0.0.1:8000'   # Change to your live URL when deployed
+SITE_URL = os.getenv('SITE_URL', 'http://127.0.0.1:8000')   # Use environment variable for production
 
 # ─────────────────────────────────────────────────
 # LOGGING
