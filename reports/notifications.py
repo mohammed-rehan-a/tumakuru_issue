@@ -168,11 +168,11 @@ def _send_sms(report, profile):
 def send_report_thankyou(report, profile):
     """
     Send thank-you Email + SMS after a report is submitted.
-    Run synchronously to ensure reliable delivery on Render.
+    Reverted to asynchronous to avoid 502 Gateway Timeouts on Render.
     """
-    _send_email(report, profile)
-    _send_sms(report, profile)
-    logger.info("Notifications sent for report %s", report.report_id)
+    _run_in_thread(_send_email, report, profile)
+    _run_in_thread(_send_sms,   report, profile)
+    logger.info("Notification threads launched for report %s", report.report_id)
 
 # ─────────────────────────────────────────────────────────
 # CERTIFICATE EMAIL
@@ -243,8 +243,8 @@ def _send_certificate_sms(profile, certificate):
 
 def send_certificate_notification(profile, certificate):
     """Send certificate congratulations via Email + SMS."""
-    _send_certificate_email(profile, certificate)
-    _send_certificate_sms(profile, certificate)
+    _run_in_thread(_send_certificate_email, profile, certificate)
+    _run_in_thread(_send_certificate_sms,   profile, certificate)
 
 # ─────────────────────────────────────────────────────────
 # STATUS UPDATE EMAIL & SMS
@@ -325,6 +325,6 @@ def _send_status_sms(report, profile):
 
 def send_status_update_notification(report, profile):
     """Send status update via Email + SMS."""
-    _send_status_email(report, profile)
-    _send_status_sms(report, profile)
+    _run_in_thread(_send_status_email, report, profile)
+    _run_in_thread(_send_status_sms,   report, profile)
 
