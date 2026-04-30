@@ -211,9 +211,14 @@ def _send_certificate_email(profile, certificate):
             f"Tumakuru City Corporation"
         )
 
-        msg = EmailMultiAlternatives(subject, text_body, from_email, [email])
-        msg.send(fail_silently=True)
-        logger.info("🏆 Certificate email sent to %s", email)
+        # Try robust email service first
+        from .email_service import send_email_robust
+        success = send_email_robust(email, subject, text_body)
+        
+        if success:
+            logger.info("🏆 Certificate email sent to %s", email)
+        else:
+            logger.error("🏆 Certificate email failed for %s", user.username)
 
     except Exception as exc:
         logger.error("Certificate email failed: %s", exc)
@@ -291,9 +296,14 @@ def _send_status_email(report, profile):
             f"Tumakuru City Corporation\n"
         )
 
-        msg = EmailMultiAlternatives(subject, text_body, from_email, [email])
-        msg.send(fail_silently=True)
-        logger.info("✉️  Status update email sent to %s", email)
+        # Try robust email service first
+        from .email_service import send_email_robust
+        success = send_email_robust(email, subject, text_body)
+        
+        if success:
+            logger.info("✉️  Status update email sent to %s", email)
+        else:
+            logger.error("✉️  Status update email failed for report %s", report.report_id)
 
     except Exception as exc:
         logger.error("Status update email failed for report %s: %s", report.report_id, exc)

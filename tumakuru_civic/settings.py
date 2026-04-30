@@ -131,7 +131,9 @@ CITY_STATE = "Karnataka"
 # Step 3: Create App Password for "Mail" → copy 16-char password
 # Step 4: Paste below
 
-EMAIL_BACKEND        = 'django.core.mail.backends.console.EmailBackend' if os.getenv('EMAIL_DEBUG_CONSOLE', 'False') == 'True' else 'django.core.mail.backends.smtp.EmailBackend'
+# Force real emails on Render, use console only locally if specified
+IS_ON_RENDER = os.getenv('RENDER', 'False') == 'True'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend' if IS_ON_RENDER else ('django.core.mail.backends.console.EmailBackend' if os.getenv('EMAIL_DEBUG_CONSOLE', 'False') == 'True' else 'django.core.mail.backends.smtp.EmailBackend')
 EMAIL_HOST           = 'smtp.gmail.com'
 EMAIL_PORT           = 587
 EMAIL_USE_TLS        = True
