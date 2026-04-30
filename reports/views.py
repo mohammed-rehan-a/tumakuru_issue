@@ -545,3 +545,9 @@ def ward_statistics(request):
     
     return render(request, 'reports/statistics.html', context)
 
+
+def robots_txt(request):
+    site_url = getattr(settings, 'SITE_URL', 'http://127.0.0.1:8000')
+    content = f"User-agent: *\nAllow: /\n\nSitemap: {site_url}/sitemap.xml"
+    return HttpResponse(content, content_type="text/plain")
+

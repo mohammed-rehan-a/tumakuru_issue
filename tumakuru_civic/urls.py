@@ -5,6 +5,14 @@ from django.conf.urls.static import static
 from rest_framework import routers
 from reports import views as report_views
 from reports.api import IssueCategoryViewSet, IssueReportViewSet, CitizenProfileViewSet
+from django.contrib.sitemaps.views import sitemap
+from reports.sitemaps import StaticViewSitemap, IssueReportSitemap
+from django.views.generic import TemplateView
+
+sitemaps = {
+    'static': StaticViewSitemap,
+    'reports': IssueReportSitemap,
+}
 
 # API Router
 router = routers.DefaultRouter()
@@ -23,6 +31,8 @@ urlpatterns = [
     path('statistics/', report_views.ward_statistics, name='statistics'),
     path('api/v1/', include(router.urls)),
     path('i18n/', include('django.conf.urls.i18n')),
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
+    path('robots.txt', report_views.robots_txt),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 admin.site.site_header = "Tumakuru City Corporation — Admin"

@@ -131,6 +131,10 @@ class IssueReport(models.Model):
     def feedback_exists(self):
         return hasattr(self, 'feedback')
 
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('report_detail', kwargs={'pk': self.pk})
+
 
 class IssueComment(models.Model):
     issue = models.ForeignKey(IssueReport, on_delete=models.CASCADE, related_name='comments')
