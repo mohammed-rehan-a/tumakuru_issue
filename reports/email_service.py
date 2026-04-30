@@ -107,18 +107,35 @@ def send_email_via_mailgun(to_email, subject, text_content, html_content=None):
         logger.error("Mailgun failed: %s", e)
         return False
 
-# Try SendGrid first, then Mailgun, then console
+def send_email_via_smtp(to_email, subject, text_content, html_content=None):
+    """
+    Standard Django SMTP fallback (Gmail)
+    """
+    try:
+        from django.core.mail import EmailMultiAlternatives
+        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'tumakurucity@gmail.com')
+        msg = EmailMultiAlternatives(subject, text_content, from_email, [to_email])
+        if html_content:
+            msg.attach_alternative(html_content, "text/html")
+        msg.send()
+        logger.info("Email sent via SMTP to %s", to_email)
+        return True
+    except Exception as e:
+        logger.error("SMTP fallback failed: %s", e)
+        return False
+
+# Try SendGrid first, then SMTP, then console
 def send_email_robust(to_email, subject, text_content, html_content=None):
     """
     Robust email sending with multiple fallbacks
     """
-    # Try SendGrid first
+    # 1. Try SendGrid API
     if send_email_via_sendgrid(to_email, subject, text_content, html_content):
         return True
     
-    # Try Mailgun
-    if send_email_via_mailgun(to_email, subject, text_content, html_content):
+    # 2. Try Standard SMTP (Gmail)
+    if send_email_via_smtp(to_email, subject, text_content, html_content):
         return True
     
-    # Fallback to console
+    # 3. Fallback to console (last resort)
     return send_email_via_console(to_email, subject, text_content, html_content)
