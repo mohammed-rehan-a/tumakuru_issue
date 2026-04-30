@@ -132,7 +132,7 @@ CITY_STATE = "Karnataka"
 # Step 4: Paste below
 
 # Force real emails on Render, use console only locally if specified
-IS_ON_RENDER = os.getenv('RENDER', 'False') == 'True'
+IS_ON_RENDER = os.getenv('RENDER', 'False').lower() == 'true'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend' if IS_ON_RENDER else ('django.core.mail.backends.console.EmailBackend' if os.getenv('EMAIL_DEBUG_CONSOLE', 'False') == 'True' else 'django.core.mail.backends.smtp.EmailBackend')
 EMAIL_HOST           = 'smtp.gmail.com'
 EMAIL_PORT           = 587

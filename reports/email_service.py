@@ -45,10 +45,15 @@ def send_email_via_sendgrid(to_email, subject, text_content, html_content=None):
         response = requests.post(url, json=data, headers=headers, timeout=30)
         
         if response.status_code == 202:
-            logger.info("Email sent via SendGrid to %s", to_email)
+            logger.info("✅ Email sent via SendGrid to %s", to_email)
             return True
         else:
-            logger.error("SendGrid error: %s - %s", response.status_code, response.text)
+            logger.error("❌ SendGrid error: %s - %s", response.status_code, response.text)
+            # If SendGrid failed but it was a configuration error, we want to know
+            if response.status_code == 401:
+                logger.error("CRITICAL: SendGrid API Key is invalid or unauthorized.")
+            elif response.status_code == 403:
+                logger.error("CRITICAL: SendGrid Sender not verified or forbidden.")
             return False
             
     except Exception as e:
@@ -118,10 +123,10 @@ def send_email_via_smtp(to_email, subject, text_content, html_content=None):
         if html_content:
             msg.attach_alternative(html_content, "text/html")
         msg.send()
-        logger.info("Email sent via SMTP to %s", to_email)
+        logger.info("✅ Email sent via SMTP to %s", to_email)
         return True
     except Exception as e:
-        logger.error("SMTP fallback failed: %s", e)
+        logger.error("❌ SMTP fallback failed for %s: %s", to_email, str(e))
         return False
 
 # Try SendGrid first, then SMTP, then console

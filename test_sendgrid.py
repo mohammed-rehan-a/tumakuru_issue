@@ -21,7 +21,7 @@ def test_sendgrid():
     print(f"DEFAULT_FROM_EMAIL: {getattr(settings, 'DEFAULT_FROM_EMAIL', 'NOT SET')}")
     
     # Test email - change to your email for testing
-    test_email = "your-email@example.com"  # CHANGE THIS TO YOUR EMAIL
+    test_email = "tumakurucity@gmail.com"  # CHANGE THIS TO YOUR EMAIL
     subject = "Test Email from Tumakuru Civic"
     text_content = "This is a test email from the Tumakuru Civic portal using SendGrid."
     html_content = "<p>This is a <strong>test email</strong> from the Tumakuru Civic portal using SendGrid.</p>"
