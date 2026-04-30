@@ -172,16 +172,13 @@
             <a class="nav-link" href="{% url 'home' %}"><i class="fas fa-home me-1"></i> {% trans "Home" %}</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'report_list' %}"><i class="fas fa-map-marked-alt me-1"></i> {% trans "All
-              Issues" %}</a>
+            <a class="nav-link" href="{% url 'report_list' %}"><i class="fas fa-map-marked-alt me-1"></i> {% trans "All Issues" %}</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'leaderboard' %}"><i class="fas fa-trophy me-1"></i> {% trans "Leaderboard"
-              %}</a>
+            <a class="nav-link" href="{% url 'leaderboard' %}"><i class="fas fa-trophy me-1"></i> {% trans "Leaderboard" %}</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'statistics' %}"><i class="fas fa-chart-pie me-1"></i> {% trans
-              "Statistics" %}</a>
+            <a class="nav-link" href="{% url 'statistics' %}"><i class="fas fa-chart-pie me-1"></i> {% trans "Statistics" %}</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="{% url 'volunteer_list' %}"><i class="fas fa-hands-helping me-1"></i>
@@ -222,8 +219,7 @@
           </li>
           {% if user.is_authenticated %}
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt me-1"></i> {% trans
-              "Dashboard" %}</a>
+            <a class="nav-link" href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt me-1"></i> {% trans "Dashboard" %}</a>
           </li>
           <li class="nav-item">
             <a class="nav-link btn-submit-nav" href="{% url 'submit_report' %}">
