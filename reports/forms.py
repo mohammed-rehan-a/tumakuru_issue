@@ -1,5 +1,5 @@
 from django import forms
-from .models import IssueReport, IssueComment, IssueCategory
+from .models import IssueReport, IssueComment, IssueCategory, EnvironmentSave
 
 
 class IssueReportForm(forms.ModelForm):
@@ -55,4 +55,13 @@ class IssueCommentForm(forms.ModelForm):
                 'placeholder': 'Add your comment...',
                 'class': 'form-control'
             })
+        }
+
+
+class EnvironmentSaveForm(forms.ModelForm):
+    class Meta:
+        model = EnvironmentSave
+        fields = ['tree_image']
+        widgets = {
+            'tree_image': forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
         }

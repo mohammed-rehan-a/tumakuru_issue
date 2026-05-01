@@ -3,8 +3,12 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.views import LoginView, LogoutView
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
 from .forms import CitizenRegistrationForm, CitizenLoginForm, ProfileUpdateForm
-from .models import CitizenProfile, CitizenCertificate, OTPToken
+from .models import CitizenProfile, CitizenCertificate, OTPToken, PushSubscription
 
 
 def register(request):
@@ -151,4 +155,45 @@ def verify_otp(request):
             messages.error(request, 'Account not found.')
             
     return render(request, 'accounts/verify_otp.html', {'phone': phone})
+
+
+@login_required
+def push_public_key(request):
+    return JsonResponse({'publicKey': getattr(settings, 'VAPID_PUBLIC_KEY', '')})
+
+
+@login_required
+def push_status(request):
+    enabled = PushSubscription.objects.filter(user=request.user).exists()
+    return JsonResponse({'enabled': enabled})
+
+
+@login_required
+@require_POST
+def push_subscribe(request):
+    try:
+        import json
+        data = json.loads(request.body.decode('utf-8'))
+        sub = data.get('subscription') or {}
+        endpoint = sub.get('endpoint')
+        keys = sub.get('keys') or {}
+        p256dh = keys.get('p256dh')
+        auth = keys.get('auth')
+        user_agent = request.headers.get('User-Agent', '')[:255]
+
+        if not endpoint or not p256dh or not auth:
+            return JsonResponse({'ok': False, 'error': 'Invalid subscription'}, status=400)
+
+        PushSubscription.objects.update_or_create(
+            endpoint=endpoint,
+            defaults={
+                'user': request.user,
+                'p256dh': p256dh,
+                'auth': auth,
+                'user_agent': user_agent,
+            }
+        )
+        return JsonResponse({'ok': True})
+    except Exception:
+        return JsonResponse({'ok': False, 'error': 'Subscribe failed'}, status=400)
 

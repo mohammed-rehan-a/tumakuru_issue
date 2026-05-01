@@ -244,6 +244,11 @@
             <a class="nav-link" href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt me-1"></i> {% trans "Dashboard" %}</a>
           </li>
           <li class="nav-item">
+            <a class="nav-link" href="{% url 'save_environment' %}">
+              <i class="fas fa-leaf me-1"></i> {% trans "Save Environment" %}
+            </a>
+          </li>
+          <li class="nav-item">
             <a class="nav-link btn-submit-nav" href="{% url 'submit_report' %}">
               <i class="fas fa-plus-circle me-1"></i> {% trans "Report Issue" %}
             </a>

@@ -18,6 +18,9 @@ DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
 
+# Public site URL (used in notifications)
+SITE_URL = os.getenv('SITE_URL', 'http://127.0.0.1:8000')
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -117,6 +120,17 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 # Points configuration
 POINTS_PER_REPORT = 5
 POINTS_FOR_CERTIFICATE = 100
+
+# Environment save (tree planting)
+POINTS_PER_TREE_SAVE = 5
+
+# Tree points milestone for downloadable certificate
+TREE_POINTS_FOR_CERTIFICATE = 100
+
+# Web Push (VAPID) configuration (set these in .env)
+VAPID_PUBLIC_KEY = os.getenv('VAPID_PUBLIC_KEY', '')
+VAPID_PRIVATE_KEY = os.getenv('VAPID_PRIVATE_KEY', '')
+VAPID_CLAIMS_EMAIL = os.getenv('VAPID_CLAIMS_EMAIL', 'mailto:admin@tumakuru.gov.in')
 
 # City name
 CITY_NAME = "Tumakuru"

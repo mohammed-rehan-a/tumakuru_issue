@@ -18,6 +18,49 @@ from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
+def _send_web_push(user, title, body, url_path='/dashboard/'):
+    """
+    Send a Web Push notification (PWA) to all user subscriptions.
+    Requires VAPID keys in settings and pywebpush installed.
+    """
+    public_key = getattr(settings, 'VAPID_PUBLIC_KEY', '')
+    private_key = getattr(settings, 'VAPID_PRIVATE_KEY', '')
+    if not public_key or not private_key:
+        return
+    try:
+        from pywebpush import webpush, WebPushException
+        from accounts.models import PushSubscription
+        import json
+
+        subs = PushSubscription.objects.filter(user=user)
+        if not subs.exists():
+            return
+
+        payload = json.dumps({
+            'title': title,
+            'body': body,
+            'url': getattr(settings, 'SITE_URL', 'http://127.0.0.1:8000') + url_path,
+        })
+        vapid_claims = {"sub": getattr(settings, 'VAPID_CLAIMS_EMAIL', 'mailto:admin@tumakuru.gov.in')}
+
+        for s in subs:
+            subscription_info = {
+                "endpoint": s.endpoint,
+                "keys": {"p256dh": s.p256dh, "auth": s.auth},
+            }
+            try:
+                webpush(
+                    subscription_info=subscription_info,
+                    data=payload,
+                    vapid_private_key=private_key,
+                    vapid_claims=vapid_claims,
+                )
+            except Exception:
+                # Ignore failures for individual endpoints
+                continue
+    except Exception:
+        return
+
 
 # ─────────────────────────────────────────────────────────
 # HELPERS
@@ -345,4 +388,11 @@ def send_status_update_notification(report, profile):
     """Send status update via Email + SMS."""
     _run_in_thread(_send_status_email, report, profile)
     _run_in_thread(_send_status_sms,   report, profile)
+    _run_in_thread(
+        _send_web_push,
+        profile.user,
+        f"Report {report.report_id} updated",
+        f"Status is now {report.get_status_display()}",
+        f"/reports/{report.pk}/",
+    )
 
