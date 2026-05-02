@@ -131,11 +131,21 @@
               <div class="col-md-6">
                 <label class="form-label">Primary Photo</label>
                 <div class="photo-upload-box" id="photo1Box">
-                  <label for="{{ form.image.id_for_label }}" style="cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:8px; color:var(--gray-600)">
-                    <i class="fas fa-cloud-upload-alt" style="font-size:32px; color:var(--gray-300)"></i>
-                    <span style="font-weight:600">Click to upload photo</span>
-                    <span style="font-size:12px">JPG, PNG up to 5MB</span>
-                  </label>
+                  <div class="upload-options" id="options_{{ form.image.id_for_label }}">
+                    <label for="{{ form.image.id_for_label }}" style="cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:8px; color:var(--gray-600)">
+                      <i class="fas fa-cloud-upload-alt" style="font-size:32px; color:var(--gray-300)"></i>
+                      <span style="font-weight:600">Click to upload photo</span>
+                    </label>
+                    <div style="margin: 10px 0; color: var(--gray-400); font-size: 12px;">— OR —</div>
+                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 camera-btn" data-input="{{ form.image.id_for_label }}">
+                      <i class="fas fa-camera me-1"></i> Take Photo
+                    </button>
+                    <div style="font-size:12px; margin-top: 10px;">JPG, PNG up to 5MB</div>
+                  </div>
+                  <div class="preview-container d-none" id="preview_{{ form.image.id_for_label }}">
+                    <img src="" class="img-fluid rounded mb-2" style="max-height: 150px;">
+                    <button type="button" class="btn btn-sm btn-link text-danger remove-photo" data-input="{{ form.image.id_for_label }}">Remove</button>
+                  </div>
                   {% render_field form.image style="display:none" id=form.image.id_for_label %}
                 </div>
                 {% if form.image.errors %}<div class="text-danger small mt-1">{{ form.image.errors }}</div>{% endif %}
@@ -143,11 +153,21 @@
               <div class="col-md-6">
                 <label class="form-label">Additional Photo <span class="text-muted small">(optional)</span></label>
                 <div class="photo-upload-box">
-                  <label for="{{ form.image2.id_for_label }}" style="cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:8px; color:var(--gray-600)">
-                    <i class="fas fa-cloud-upload-alt" style="font-size:32px; color:var(--gray-300)"></i>
-                    <span style="font-weight:600">Click to upload photo</span>
-                    <span style="font-size:12px">JPG, PNG up to 5MB</span>
-                  </label>
+                  <div class="upload-options" id="options_{{ form.image2.id_for_label }}">
+                    <label for="{{ form.image2.id_for_label }}" style="cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:8px; color:var(--gray-600)">
+                      <i class="fas fa-cloud-upload-alt" style="font-size:32px; color:var(--gray-300)"></i>
+                      <span style="font-weight:600">Click to upload photo</span>
+                    </label>
+                    <div style="margin: 10px 0; color: var(--gray-400); font-size: 12px;">— OR —</div>
+                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 camera-btn" data-input="{{ form.image2.id_for_label }}">
+                      <i class="fas fa-camera me-1"></i> Take Photo
+                    </button>
+                    <div style="font-size:12px; margin-top: 10px;">JPG, PNG up to 5MB</div>
+                  </div>
+                  <div class="preview-container d-none" id="preview_{{ form.image2.id_for_label }}">
+                    <img src="" class="img-fluid rounded mb-2" style="max-height: 150px;">
+                    <button type="button" class="btn btn-sm btn-link text-danger remove-photo" data-input="{{ form.image2.id_for_label }}">Remove</button>
+                  </div>
                   {% render_field form.image2 style="display:none" id=form.image2.id_for_label %}
                 </div>
               </div>
@@ -174,31 +194,179 @@
   </div>
 </div>
 
+<!-- Camera Modal -->
+<div class="modal fade" id="cameraModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content overflow-hidden" style="border-radius: 20px; border: none; background: #000;">
+      <div class="modal-body p-0 position-relative">
+        <video id="cameraVideo" autoplay playsinline style="width: 100%; height: auto; display: block;"></video>
+        <div class="camera-controls position-absolute bottom-0 start-0 end-0 p-4 d-flex justify-content-between align-items-center" style="background: linear-gradient(transparent, rgba(0,0,0,0.7));">
+          <button type="button" class="btn btn-lg btn-light rounded-circle" id="closeCamera" style="width: 50px; height: 50px;"><i class="fas fa-times"></i></button>
+          <button type="button" class="btn btn-lg btn-primary rounded-circle shadow-lg" id="capturePhoto" style="width: 70px; height: 70px; border: 4px solid white;"><i class="fas fa-camera fa-lg"></i></button>
+          <button type="button" class="btn btn-lg btn-light rounded-circle" id="switchCamera" style="width: 50px; height: 50px;"><i class="fas fa-sync"></i></button>
+        </div>
+        <div id="cameraLoading" class="position-absolute top-0 start-0 end-0 bottom-0 d-flex align-items-center justify-content-center bg-dark" style="z-index: 10;">
+          <div class="text-center text-white">
+            <div class="spinner-border mb-2" role="status"></div>
+            <div>Initializing Camera...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<canvas id="captureCanvas" style="display:none"></canvas>
+
 <style>
 .photo-upload-box {
   border: 2px dashed var(--gray-300);
   border-radius: var(--radius-sm);
-  padding: 32px 16px;
+  padding: 24px 16px;
   text-align: center;
   background: var(--gray-50);
   transition: var(--transition);
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 .photo-upload-box:hover { border-color: var(--navy-mid); background: white; }
+.camera-btn:hover { background-color: var(--navy); color: white !important; }
+.preview-container img {
+  box-shadow: var(--shadow-sm);
+  border: 2px solid white;
+}
 </style>
 
 {% block extra_js %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script>
-// File input labels
-['{{ form.image.id_for_label }}', '{{ form.image2.id_for_label }}'].forEach(id => {
-  const input = document.getElementById(id);
-  if (!input) return;
-  input.addEventListener('change', function() {
-    if (this.files && this.files[0]) {
-      const label = this.closest('.photo-upload-box').querySelector('span');
-      if(label) label.textContent = this.files[0].name;
+document.addEventListener('DOMContentLoaded', function() {
+  // Camera Logic
+  let currentStream = null;
+  let currentInputId = null;
+  let useFrontCamera = false;
+  
+  const cameraModalEl = document.getElementById('cameraModal');
+  if (!cameraModalEl) return;
+  
+  const cameraModal = new bootstrap.Modal(cameraModalEl);
+  const video = document.getElementById('cameraVideo');
+  const canvas = document.getElementById('captureCanvas');
+  const loading = document.getElementById('cameraLoading');
+
+  async function startCamera() {
+    if (currentStream) {
+      currentStream.getTracks().forEach(track => track.stop());
     }
+    
+    loading.classList.remove('d-none');
+    
+    const constraints = {
+      video: {
+        facingMode: useFrontCamera ? "user" : "environment",
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      }
+    };
+
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error("Your browser does not support camera access or you are not on a secure (HTTPS) connection.");
+      }
+      currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+      video.srcObject = currentStream;
+      loading.classList.add('d-none');
+    } catch (err) {
+      console.error("Error accessing camera:", err);
+      alert(err.message || "Could not access camera. Please ensure you've granted permissions.");
+      cameraModal.hide();
+    }
+  }
+
+  document.querySelectorAll('.camera-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      currentInputId = this.dataset.input;
+      cameraModal.show();
+      startCamera();
+    });
+  });
+
+  document.getElementById('closeCamera').addEventListener('click', () => {
+    if (currentStream) {
+      currentStream.getTracks().forEach(track => track.stop());
+    }
+    cameraModal.hide();
+  });
+
+  document.getElementById('switchCamera').addEventListener('click', () => {
+    useFrontCamera = !useFrontCamera;
+    startCamera();
+  });
+
+  document.getElementById('capturePhoto').addEventListener('click', () => {
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    
+    canvas.toBlob(blob => {
+      const file = new File([blob], `camera_capture_${Date.now()}.jpg`, { type: "image/jpeg" });
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(file);
+      
+      const input = document.getElementById(currentInputId);
+      input.files = dataTransfer.files;
+      
+      // Show preview
+      const box = input.closest('.photo-upload-box');
+      const options = box.querySelector('.upload-options');
+      const preview = box.querySelector('.preview-container');
+      const img = preview.querySelector('img');
+      
+      img.src = URL.createObjectURL(blob);
+      options.classList.add('d-none');
+      preview.classList.remove('d-none');
+      
+      // Stop camera and close modal
+      if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
+      }
+      cameraModal.hide();
+    }, 'image/jpeg', 0.85);
+  });
+
+  // Remove photo logic
+  document.querySelectorAll('.remove-photo').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const inputId = this.dataset.input;
+      const input = document.getElementById(inputId);
+      input.value = "";
+      
+      const box = input.closest('.photo-upload-box');
+      box.querySelector('.upload-options').classList.remove('d-none');
+      box.querySelector('.preview-container').classList.add('d-none');
+    });
+  });
+
+  // File input change logic (for standard uploads)
+  ['{{ form.image.id_for_label }}', '{{ form.image2.id_for_label }}'].forEach(id => {
+    const input = document.getElementById(id);
+    if (!input) return;
+    input.addEventListener('change', function() {
+      if (this.files && this.files[0]) {
+        const box = this.closest('.photo-upload-box');
+        const options = box.querySelector('.upload-options');
+        const preview = box.querySelector('.preview-container');
+        const img = preview.querySelector('img');
+        
+        img.src = URL.createObjectURL(this.files[0]);
+        options.classList.add('d-none');
+        preview.classList.remove('d-none');
+      }
+    });
   });
 });
 // Submit button feedback

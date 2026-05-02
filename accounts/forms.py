@@ -58,6 +58,7 @@ class ProfileUpdateForm(forms.ModelForm):
         widgets = {
             'address': forms.Textarea(attrs={'rows': 3}),
             'bio': forms.Textarea(attrs={'rows': 3}),
+            'profile_photo': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*', 'capture': 'user'}),
         }
 
     def __init__(self, *args, **kwargs):
