@@ -18,9 +18,19 @@ def send_email_via_sendgrid(to_email, subject, text_content, html_content=None):
         api_key = getattr(settings, 'SENDGRID_API_KEY', '')
         if not api_key:
             logger.info("SendGrid API key not set - falling back to console")
-            return send_email_via_console(to_email, subject, text_content, html_content)
+            return False
         
-        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'tumakurucity@gmail.com')
+        raw_from = getattr(settings, 'DEFAULT_FROM_EMAIL', 'tumakurucity@gmail.com')
+        
+        # Parse "Name <email@example.com>" format
+        from_email = raw_from
+        from_name = ""
+        if '<' in raw_from and '>' in raw_from:
+            import re
+            match = re.search(r'(.*)<(.*)>', raw_from)
+            if match:
+                from_name = match.group(1).strip()
+                from_email = match.group(2).strip()
         
         url = "https://api.sendgrid.com/v3/mail/send"
         headers = {
@@ -39,9 +49,13 @@ def send_email_via_sendgrid(to_email, subject, text_content, html_content=None):
             ]
         }
         
+        if from_name:
+            data["from"]["name"] = from_name
+            
         if html_content:
             data["content"].append({"type": "text/html", "value": html_content})
         
+        logger.info("Attempting to send email via SendGrid API to %s...", to_email)
         response = requests.post(url, json=data, headers=headers, timeout=30)
         
         if response.status_code == 202:
@@ -49,15 +63,17 @@ def send_email_via_sendgrid(to_email, subject, text_content, html_content=None):
             return True
         else:
             logger.error("❌ SendGrid error: %s - %s", response.status_code, response.text)
-            # If SendGrid failed but it was a configuration error, we want to know
+            # Help user identify common issues on Render
             if response.status_code == 401:
-                logger.error("CRITICAL: SendGrid API Key is invalid or unauthorized.")
+                logger.error("CRITICAL: SendGrid API Key is invalid. Ensure it starts with 'SG.'")
             elif response.status_code == 403:
-                logger.error("CRITICAL: SendGrid Sender not verified or forbidden.")
+                logger.error("CRITICAL: SendGrid Sender not verified. You must verify '%s' in SendGrid dashboard.", from_email)
             return False
             
     except Exception as e:
-        logger.error("SendGrid failed: %s", e)
+        logger.error("SendGrid failed with exception: %s", str(e))
+        import traceback
+        logger.error(traceback.format_exc())
         return False
 
 def send_email_via_console(to_email, subject, text_content, html_content=None):

@@ -23,7 +23,7 @@ from .utils import (
     generate_tree_milestone_certificate_number,
     generate_tree_milestone_pdf,
 )
-from .notifications import send_report_thankyou, send_certificate_notification
+from .notifications import send_report_thankyou, send_certificate_notification, send_tree_thankyou
 from .notifications import _send_web_push
 
 
@@ -181,6 +181,9 @@ def save_environment(request):
             new_points = old_points + points_for_tree
             old_milestones = old_points // tree_threshold
             new_milestones = new_points // tree_threshold
+            points_to_milestone = tree_threshold - (new_points % tree_threshold)
+            if points_to_milestone == tree_threshold:
+                points_to_milestone = 0
 
             if new_milestones > old_milestones:
                 milestone = new_milestones * tree_threshold
@@ -193,6 +196,16 @@ def save_environment(request):
                     milestone=milestone,
                     tree_points_at_issue=new_points,
                     trees_count_at_issue=trees_count,
+                )
+
+                # Email notification for tree milestone
+                send_tree_thankyou(
+                    request.user,
+                    points_for_tree,
+                    new_points,
+                    points_to_milestone,
+                    milestone=milestone,
+                    certificate_path=f"/reports/tree-milestone/{milestone_cert.pk}/",
                 )
 
                 # PWA push notification (if user enabled)
@@ -211,6 +224,14 @@ def save_environment(request):
                     f'🎉 Congratulations! You reached {milestone} Tree Points. Your Tree Milestone Certificate is ready to download.'
                 )
                 return redirect('tree_milestone_certificate_detail', pk=milestone_cert.pk)
+
+            # Email notification for normal tree save (no milestone yet)
+            send_tree_thankyou(
+                request.user,
+                points_for_tree,
+                new_points,
+                points_to_milestone,
+            )
 
             messages.success(request, f'🌱 Tree saved! +{points_for_tree} Tree Points.')
             return redirect('dashboard')
