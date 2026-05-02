@@ -33,6 +33,7 @@ urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
     path('robots.txt', report_views.robots_txt),
+    path('portfolio/', report_views.portfolio, name='portfolio'),
     path('google1ce7ce4bdb96776c.html', TemplateView.as_view(template_name="google1ce7ce4bdb96776c.html", content_type="text/html")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

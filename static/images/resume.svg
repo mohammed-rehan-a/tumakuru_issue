@@ -1,0 +1,76 @@
+<svg width="800" height="1131" viewBox="0 0 800 1131" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="1131" fill="#080b10"/>
+  <rect width="800" height="5" fill="#00dcc8"/>
+  
+  <!-- Header -->
+  <text x="50" y="80" font-family="Arial, sans-serif" font-size="42" font-weight="bold" fill="#ffffff">MOHAMMED REHAN A</text>
+  <text x="50" y="115" font-family="Arial, sans-serif" font-size="18" font-weight="normal" fill="#00dcc8" letter-spacing="2">DEVELOPER | PROGRAMMER | IOT ENTHUSIAST</text>
+  
+  <line x1="50" y1="140" x2="750" y2="140" stroke="#131c27" stroke-width="1"/>
+  
+  <!-- Contact Info -->
+  <g transform="translate(50, 170)">
+    <text x="0" y="0" font-family="Arial, sans-serif" font-size="14" fill="#6b8090">Email: mohammedrehan0026@gmail.com</text>
+    <text x="300" y="0" font-family="Arial, sans-serif" font-size="14" fill="#6b8090">GitHub: github.com/mohammed-rehan-a</text>
+    <text x="600" y="0" font-family="Arial, sans-serif" font-size="14" fill="#6b8090">LinkedIn: mohammed-rehan-a</text>
+  </g>
+  
+  <!-- Objective -->
+  <g transform="translate(50, 220)">
+    <text x="0" y="0" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#00dcc8">OBJECTIVE</text>
+    <text x="0" y="30" font-family="Arial, sans-serif" font-size="14" fill="#cdd8e3" width="700">
+      Looking for internships, freelance opportunities, or entry-level roles to apply skills
+    </text>
+    <text x="0" y="50" font-family="Arial, sans-serif" font-size="14" fill="#cdd8e3">
+      and gain real-world experience in building impactful software solutions.
+    </text>
+  </g>
+  
+  <!-- Education -->
+  <g transform="translate(50, 310)">
+    <text x="0" y="0" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#00dcc8">EDUCATION</text>
+    <text x="0" y="30" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#ffffff">B.E. in Computer Science &amp; Engineering</text>
+    <text x="0" y="55" font-family="Arial, sans-serif" font-size="14" fill="#6b8090">Sri Siddhartha Institute of Technology | 2023 – 2027</text>
+  </g>
+  
+  <!-- Skills -->
+  <g transform="translate(50, 410)">
+    <text x="0" y="0" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#00dcc8">TECHNICAL SKILLS</text>
+    
+    <text x="0" y="35" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffffff">Languages:</text>
+    <text x="120" y="35" font-family="Arial, sans-serif" font-size="14" fill="#cdd8e3">C, Python, Java, SQL</text>
+    
+    <text x="0" y="65" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffffff">Technologies:</text>
+    <text x="120" y="65" font-family="Arial, sans-serif" font-size="14" fill="#cdd8e3">IoT, Web Development (Django), Embedded Systems</text>
+    
+    <text x="0" y="95" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffffff">Tools:</text>
+    <text x="120" y="95" font-family="Arial, sans-serif" font-size="14" fill="#cdd8e3">Arduino IDE, VS Code, Git</text>
+  </g>
+  
+  <!-- Projects -->
+  <g transform="translate(50, 560)">
+    <text x="0" y="0" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#00dcc8">SELECTED PROJECTS</text>
+    
+    <text x="0" y="35" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#ffffff">1. Citizen Issue Reporting System</text>
+    <text x="20" y="60" font-family="Arial, sans-serif" font-size="14" fill="#cdd8e3">Django-based civic web platform for reporting and tracking urban issues.</text>
+    
+    <text x="0" y="100" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#ffffff">2. E-Commerce Platform</text>
+    <text x="20" y="125" font-family="Arial, sans-serif" font-size="14" fill="#cdd8e3">Full-stack online shopping application with cart and user management.</text>
+    
+    <text x="0" y="165" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#ffffff">3. IoT Automation Systems</text>
+    <text x="20" y="190" font-family="Arial, sans-serif" font-size="14" fill="#cdd8e3">Arduino-based projects integrating sensors for real-world automation.</text>
+  </g>
+  
+  <!-- Certifications -->
+  <g transform="translate(50, 810)">
+    <text x="0" y="0" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#00dcc8">CERTIFICATIONS</text>
+    <circle cx="10" cy="30" r="3" fill="#00dcc8"/> <text x="25" y="35" font-family="Arial, sans-serif" font-size="14" fill="#cdd8e3">NPTEL Certification</text>
+    <circle cx="10" cy="60" r="3" fill="#00dcc8"/> <text x="25" y="65" font-family="Arial, sans-serif" font-size="14" fill="#cdd8e3">IoT &amp; Embedded Systems Training</text>
+    <circle cx="10" cy="90" r="3" fill="#00dcc8"/> <text x="25" y="95" font-family="Arial, sans-serif" font-size="14" fill="#cdd8e3">Soft Skills &amp; Professional Development</text>
+  </g>
+  
+  <!-- Footer -->
+  <line x1="50" y1="1050" x2="750" y2="1050" stroke="#131c27" stroke-width="1"/>
+  <text x="400" y="1080" font-family="Arial, sans-serif" font-size="12" fill="#6b8090" text-anchor="middle">Generated by Portfolio System | 2025</text>
+</svg>

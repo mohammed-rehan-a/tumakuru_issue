@@ -711,3 +711,7 @@ def robots_txt(request):
     content = f"User-agent: *\nAllow: /\n\nSitemap: {site_url}/sitemap.xml"
     return HttpResponse(content, content_type="text/plain")
 
+
+def portfolio(request):
+    return render(request, 'portfolio.html')
+
