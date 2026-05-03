@@ -243,8 +243,7 @@
           </li>
           {% if user.is_authenticated %}
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt me-1"></i> {% trans
-              "Dashboard" %}</a>
+            <a class="nav-link" href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt me-1"></i> {% trans "Dashboard" %}</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="{% url 'save_environment' %}">
