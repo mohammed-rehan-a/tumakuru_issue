@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.conf import settings
 
 
 class IssueCategory(models.Model):
@@ -96,6 +97,21 @@ class IssueReport(models.Model):
             random_part = ''.join(random.choices(string.digits, k=6))
             self.report_id = f"{prefix}{year}{random_part}"
             
+            
+        # Point deduction logic for rejected reports
+        if not is_new and old_status != 'rejected' and self.status == 'rejected' and self.is_points_given:
+            profile = self.citizen.profile
+            if profile.points >= self.points_awarded:
+                profile.points -= self.points_awarded
+            else:
+                profile.points = 0
+            profile.save()
+            
+            self.points_awarded = 0
+            self.is_points_given = False
+            # We don't need to call super().save() again because we are still in the save process
+            # and these changes to self will be saved by the super().save() call below.
+
         super().save(*args, **kwargs)
         
         # Trigger notifications if status changed to in_progress or resolved
