@@ -1,5 +1,5 @@
 from django import forms
-from .models import IssueReport, IssueComment, IssueCategory
+from .models import IssueReport, IssueComment, IssueCategory, EnvironmentSave
 
 
 class IssueReportForm(forms.ModelForm):
@@ -40,8 +40,8 @@ class IssueReportForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['category'].queryset = IssueCategory.objects.filter(is_active=True)
-        self.fields['image'].widget.attrs.update({'class': 'form-control', 'accept': 'image/*'})
-        self.fields['image2'].widget.attrs.update({'class': 'form-control', 'accept': 'image/*'})
+        self.fields['image'].widget.attrs.update({'class': 'form-control', 'accept': 'image/*', 'capture': 'environment'})
+        self.fields['image2'].widget.attrs.update({'class': 'form-control', 'accept': 'image/*', 'capture': 'environment'})
         self.fields['image2'].required = False
 
 
@@ -55,4 +55,13 @@ class IssueCommentForm(forms.ModelForm):
                 'placeholder': 'Add your comment...',
                 'class': 'form-control'
             })
+        }
+
+
+class EnvironmentSaveForm(forms.ModelForm):
+    class Meta:
+        model = EnvironmentSave
+        fields = ['tree_image']
+        widgets = {
+            'tree_image': forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': 'image/*', 'capture': 'environment'}),
         }

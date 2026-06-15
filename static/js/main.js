@@ -57,4 +57,58 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // PWA Push notifications (Web Push)
+  async function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
+    return outputArray;
+  }
+
+  async function getCSRFToken() {
+    const el = document.querySelector('input[name="csrfmiddlewaretoken"]');
+    return el ? el.value : '';
+  }
+
+  async function enablePush() {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      alert('Push notifications are not supported in this browser.');
+      return;
+    }
+
+    const perm = await Notification.requestPermission();
+    if (perm !== 'granted') return;
+
+    const pubRes = await fetch('/accounts/push/public-key/');
+    const { publicKey } = await pubRes.json();
+    if (!publicKey) {
+      alert('Push is not configured on server (missing VAPID keys).');
+      return;
+    }
+
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: await urlBase64ToUint8Array(publicKey),
+    });
+
+    const csrf = await getCSRFToken();
+    await fetch('/accounts/push/subscribe/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
+      body: JSON.stringify({ subscription: sub.toJSON() }),
+    });
+
+    alert('Notifications enabled!');
+  }
+
+  document.querySelectorAll('[data-enable-push="true"]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      enablePush();
+    });
+  });
+
 });

@@ -18,6 +18,49 @@ from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
+def _send_web_push(user, title, body, url_path='/dashboard/'):
+    """
+    Send a Web Push notification (PWA) to all user subscriptions.
+    Requires VAPID keys in settings and pywebpush installed.
+    """
+    public_key = getattr(settings, 'VAPID_PUBLIC_KEY', '')
+    private_key = getattr(settings, 'VAPID_PRIVATE_KEY', '')
+    if not public_key or not private_key:
+        return
+    try:
+        from pywebpush import webpush, WebPushException
+        from accounts.models import PushSubscription
+        import json
+
+        subs = PushSubscription.objects.filter(user=user)
+        if not subs.exists():
+            return
+
+        payload = json.dumps({
+            'title': title,
+            'body': body,
+            'url': getattr(settings, 'SITE_URL', 'http://127.0.0.1:8000') + url_path,
+        })
+        vapid_claims = {"sub": getattr(settings, 'VAPID_CLAIMS_EMAIL', 'mailto:admin@tumakuru.gov.in')}
+
+        for s in subs:
+            subscription_info = {
+                "endpoint": s.endpoint,
+                "keys": {"p256dh": s.p256dh, "auth": s.auth},
+            }
+            try:
+                webpush(
+                    subscription_info=subscription_info,
+                    data=payload,
+                    vapid_private_key=private_key,
+                    vapid_claims=vapid_claims,
+                )
+            except Exception:
+                # Ignore failures for individual endpoints
+                continue
+    except Exception:
+        return
+
 
 # ─────────────────────────────────────────────────────────
 # HELPERS
@@ -102,6 +145,50 @@ def _send_email(report, profile):
         traceback.print_exc()
 
 
+def _send_tree_email(user, tree_points_earned, total_tree_points, points_to_milestone, milestone=None, certificate_path=None):
+    """Send email after a tree is planted (and optional milestone unlocked)."""
+    try:
+        email = getattr(user, 'email', '')
+        if not email:
+            return
+
+        citizen_name = user.get_full_name() or user.username
+        threshold = getattr(settings, 'TREE_POINTS_FOR_CERTIFICATE', 100)
+        site = getattr(settings, 'SITE_URL', 'http://127.0.0.1:8000')
+        dashboard_url = site + '/dashboard/'
+
+        if milestone:
+            subject = f"🎉 Tree Milestone Reached ({milestone} points) — Tumakuru City Corporation"
+        else:
+            subject = "🌱 Tree Saved — Tumakuru City Corporation"
+
+        text_body = (
+            f"Dear {citizen_name},\n\n"
+            f"Thank you for planting a tree and uploading your photo.\n\n"
+            f"Tree Points Earned: +{tree_points_earned}\n"
+            f"Total Tree Points : {total_tree_points}\n\n"
+        )
+
+        if milestone and certificate_path:
+            text_body += (
+                f"Congratulations! You reached {milestone} Tree Points.\n"
+                f"Your Tree Milestone Certificate is ready:\n"
+                f"{site}{certificate_path}\n\n"
+            )
+        else:
+            text_body += (
+                f"{points_to_milestone} more Tree Points to unlock your {threshold}-point certificate.\n\n"
+            )
+
+        text_body += f"Dashboard: {dashboard_url}\n\nTumakuru City Corporation"
+
+        # Use same robust mailer used elsewhere in this project
+        from .email_service import send_email_robust
+        send_email_robust(email, subject, text_body)
+    except Exception as exc:
+        logger.error("Tree email failed for user %s: %s", getattr(user, 'username', 'unknown'), exc)
+
+
 # ─────────────────────────────────────────────────────────
 # SMS  (Fast2SMS — free Indian SMS API)
 # ─────────────────────────────────────────────────────────
@@ -181,6 +268,19 @@ def send_report_thankyou(report, profile):
         logger.info("Notifications sent for report %s", report.report_id)
     except Exception as e:
         logger.error("Notification failed for report %s: %s", report.report_id, e)
+
+
+def send_tree_thankyou(user, tree_points_earned, total_tree_points, points_to_milestone, milestone=None, certificate_path=None):
+    """Send tree planting confirmation email (and optional milestone unlock email)."""
+    _run_in_thread(
+        _send_tree_email,
+        user,
+        tree_points_earned,
+        total_tree_points,
+        points_to_milestone,
+        milestone,
+        certificate_path,
+    )
 
 # ─────────────────────────────────────────────────────────
 # CERTIFICATE EMAIL
@@ -345,4 +445,11 @@ def send_status_update_notification(report, profile):
     """Send status update via Email + SMS."""
     _run_in_thread(_send_status_email, report, profile)
     _run_in_thread(_send_status_sms,   report, profile)
+    _run_in_thread(
+        _send_web_push,
+        profile.user,
+        f"Report {report.report_id} updated",
+        f"Status is now {report.get_status_display()}",
+        f"/reports/{report.pk}/",
+    )
 

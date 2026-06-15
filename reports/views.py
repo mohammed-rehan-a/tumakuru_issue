@@ -5,11 +5,26 @@ from django.http import HttpResponse, JsonResponse
 from django.db.models import Count, Sum, Q
 from django.conf import settings
 from django.utils import timezone
-from .models import IssueReport, IssueCategory, IssueComment, IssueUpvote
-from .forms import IssueReportForm, IssueCommentForm
+from .models import (
+    IssueReport,
+    IssueCategory,
+    IssueComment,
+    IssueUpvote,
+    EnvironmentSave,
+    TreePlantingCertificate,
+    TreeMilestoneCertificate,
+)
+from .forms import IssueReportForm, IssueCommentForm, EnvironmentSaveForm
 from accounts.models import CitizenProfile, CitizenCertificate
-from .utils import generate_certificate_number, generate_certificate_pdf
-from .notifications import send_report_thankyou, send_certificate_notification
+from .utils import (
+    generate_certificate_number,
+    generate_certificate_pdf,
+    generate_tree_certificate_number,
+    generate_tree_milestone_certificate_number,
+    generate_tree_milestone_pdf,
+)
+from .notifications import send_report_thankyou, send_certificate_notification, send_tree_thankyou
+from .notifications import _send_web_push
 
 
 def home(request):
@@ -86,6 +101,19 @@ def dashboard(request):
         'points': profile.points,
         'certificates': profile.certificates_earned(),
     }
+    tree_certificates = TreePlantingCertificate.objects.filter(citizen=request.user)[:6]
+    tree_stats = TreePlantingCertificate.objects.filter(citizen=request.user).aggregate(
+        total=Count('id'),
+        points=Sum('tree_points'),
+    )
+    tree_total = tree_stats.get('total') or 0
+    tree_points = tree_stats.get('points') or 0
+    tree_threshold = getattr(settings, 'TREE_POINTS_FOR_CERTIFICATE', 100)
+    tree_points_needed = tree_threshold - (tree_points % tree_threshold) if tree_points else tree_threshold
+    if tree_points and (tree_points % tree_threshold) == 0:
+        tree_points_needed = 0
+
+    latest_tree_milestone = TreeMilestoneCertificate.objects.filter(citizen=request.user).first()
 
     q = request.GET.get('q', '').strip()
     if q:
@@ -109,6 +137,12 @@ def dashboard(request):
         'stats': stats,
         'recent_reports': recent,
         'certificates': certificates,
+        'tree_certificates': tree_certificates,
+        'tree_total': tree_total,
+        'tree_points': tree_points,
+        'tree_threshold': tree_threshold,
+        'tree_points_needed': tree_points_needed,
+        'latest_tree_milestone': latest_tree_milestone,
         'progress': progress,
         'points_needed': points_needed,
         'profile': profile,
@@ -116,6 +150,132 @@ def dashboard(request):
         'points_threshold': settings.POINTS_FOR_CERTIFICATE,
     })
 
+
+@login_required
+def save_environment(request):
+    profile = request.user.profile
+    points_for_tree = getattr(settings, 'POINTS_PER_TREE_SAVE', 10)
+    tree_threshold = getattr(settings, 'TREE_POINTS_FOR_CERTIFICATE', 100)
+
+    if request.method == 'POST':
+        form = EnvironmentSaveForm(request.POST, request.FILES)
+        if form.is_valid():
+            old_points = (
+                TreePlantingCertificate.objects.filter(citizen=request.user).aggregate(points=Sum('tree_points')).get('points')
+                or 0
+            )
+
+            env = form.save(commit=False)
+            env.citizen = request.user
+            env.points_awarded = points_for_tree
+            env.save()
+
+            cert_number = generate_tree_certificate_number(request.user.id, env.id)
+            certificate = TreePlantingCertificate.objects.create(
+                citizen=request.user,
+                environment_save=env,
+                certificate_number=cert_number,
+                tree_points=points_for_tree,
+            )
+
+            new_points = old_points + points_for_tree
+            old_milestones = old_points // tree_threshold
+            new_milestones = new_points // tree_threshold
+            points_to_milestone = tree_threshold - (new_points % tree_threshold)
+            if points_to_milestone == tree_threshold:
+                points_to_milestone = 0
+
+            if new_milestones > old_milestones:
+                milestone = new_milestones * tree_threshold
+                milestone_number = generate_tree_milestone_certificate_number(request.user.id, milestone)
+
+                trees_count = TreePlantingCertificate.objects.filter(citizen=request.user).count()
+                milestone_cert = TreeMilestoneCertificate.objects.create(
+                    citizen=request.user,
+                    certificate_number=milestone_number,
+                    milestone=milestone,
+                    tree_points_at_issue=new_points,
+                    trees_count_at_issue=trees_count,
+                )
+
+                # Email notification for tree milestone
+                send_tree_thankyou(
+                    request.user,
+                    points_for_tree,
+                    new_points,
+                    points_to_milestone,
+                    milestone=milestone,
+                    certificate_path=f"/reports/tree-milestone/{milestone_cert.pk}/",
+                )
+
+                # PWA push notification (if user enabled)
+                try:
+                    _send_web_push(
+                        request.user,
+                        "Tree certificate unlocked",
+                        f"Congratulations! You reached {milestone} Tree Points.",
+                        f"/reports/tree-milestone/{milestone_cert.pk}/",
+                    )
+                except Exception:
+                    pass
+
+                messages.success(
+                    request,
+                    f'🎉 Congratulations! You reached {milestone} Tree Points. Your Tree Milestone Certificate is ready to download.'
+                )
+                return redirect('tree_milestone_certificate_detail', pk=milestone_cert.pk)
+
+            # Email notification for normal tree save (no milestone yet)
+            send_tree_thankyou(
+                request.user,
+                points_for_tree,
+                new_points,
+                points_to_milestone,
+            )
+
+            messages.success(request, f'🌱 Tree saved! +{points_for_tree} Tree Points.')
+            return redirect('dashboard')
+    else:
+        form = EnvironmentSaveForm()
+
+    return render(request, 'reports/save_environment.html', {
+        'form': form,
+        'points_for_tree': points_for_tree,
+    })
+
+
+@login_required
+def tree_certificate_detail(request, pk):
+    certificate = get_object_or_404(TreePlantingCertificate, pk=pk, citizen=request.user)
+    return render(request, 'reports/tree_certificate.html', {'certificate': certificate})
+
+
+@login_required
+def tree_milestone_certificate_detail(request, pk):
+    certificate = get_object_or_404(TreeMilestoneCertificate, pk=pk, citizen=request.user)
+    return render(request, 'reports/tree_milestone_certificate.html', {'certificate': certificate})
+
+
+@login_required
+def download_tree_milestone_certificate(request, pk):
+    certificate = get_object_or_404(TreeMilestoneCertificate, pk=pk, citizen=request.user)
+
+    threshold = getattr(settings, 'TREE_POINTS_FOR_CERTIFICATE', 100)
+    if certificate.milestone % threshold != 0:
+        messages.error(request, 'Invalid tree milestone certificate.')
+        return redirect('dashboard')
+
+    buffer = generate_tree_milestone_pdf(request.user, certificate)
+    if not buffer:
+        messages.error(request, 'Could not generate PDF. Please install reportlab: pip install reportlab')
+        return redirect('tree_milestone_certificate_detail', pk=pk)
+
+    certificate.is_downloaded = True
+    certificate.save(update_fields=['is_downloaded'])
+
+    response = HttpResponse(buffer, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="TreeMilestone_{certificate.certificate_number}.pdf"'
+    return response
 
 @login_required
 def submit_report(request):
@@ -550,4 +710,8 @@ def robots_txt(request):
     site_url = getattr(settings, 'SITE_URL', 'http://127.0.0.1:8000')
     content = f"User-agent: *\nAllow: /\n\nSitemap: {site_url}/sitemap.xml"
     return HttpResponse(content, content_type="text/plain")
+
+
+def portfolio(request):
+    return render(request, 'portfolio.html')
 

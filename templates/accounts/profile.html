@@ -53,6 +53,15 @@
             <div class="info-icon" style="background:#FFF8EC; color:var(--gold)"><i class="fas fa-star"></i></div>
             <div><span class="info-label">Civic Points</span><span class="info-value" style="font-size:1.3rem; font-weight:700; color:var(--navy); font-family:'Playfair Display',serif">{{ profile.points }}</span></div>
           </div>
+          <div class="px-4 pb-3">
+            <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--gray-600); margin-bottom:6px">
+              <span>Progress to Best Citizen Certificate</span>
+              <span>{{ profile.points|add:0 }} / 100</span>
+            </div>
+            <div class="progress-civic mb-2">
+              <div class="progress-bar" style="width:{{ profile.progress_percentage }}%" data-target="{{ profile.progress_percentage }}"></div>
+            </div>
+          </div>
           <div class="info-row px-4">
             <div class="info-icon"><i class="fas fa-file-alt"></i></div>
             <div><span class="info-label">Total Reports</span><span class="info-value">{{ profile.total_reports }}</span></div>

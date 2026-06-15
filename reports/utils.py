@@ -15,6 +15,83 @@ def generate_certificate_number(citizen_id, milestone):
     return f"TCC-BC-{year}-{citizen_id:04d}-M{milestone // 100}"
 
 
+def generate_tree_certificate_number(user_id, environment_save_id):
+    year = datetime.now().year
+    return f"TCC-TREE-{year}-{user_id:04d}-T{environment_save_id:06d}"
+
+
+def generate_tree_milestone_certificate_number(user_id, milestone):
+    year = datetime.now().year
+    return f"TCC-TREE-M{milestone}-{year}-{user_id:04d}"
+
+
+def generate_tree_milestone_pdf(user, certificate):
+    """
+    Generate a simple Tree Milestone PDF certificate (ReportLab).
+    Returns BytesIO buffer or None if reportlab missing.
+    """
+    try:
+        from io import BytesIO
+        from reportlab.lib.pagesizes import A4, landscape
+        from reportlab.pdfgen import canvas
+        from reportlab.lib.colors import HexColor
+
+        buffer = BytesIO()
+        w, h = landscape(A4)
+        c = canvas.Canvas(buffer, pagesize=landscape(A4))
+
+        # Background
+        c.setFillColor(HexColor('#0A1628'))
+        c.rect(0, 0, w, h, fill=1, stroke=0)
+
+        # Border
+        c.setStrokeColor(HexColor('#2ECC71'))
+        c.setLineWidth(6)
+        c.rect(24, 24, w - 48, h - 48, fill=0, stroke=1)
+
+        c.setStrokeColor(HexColor('#E8C96B'))
+        c.setLineWidth(2)
+        c.rect(40, 40, w - 80, h - 80, fill=0, stroke=1)
+
+        # Header
+        c.setFillColor(HexColor('#E8C96B'))
+        c.setFont("Helvetica-Bold", 18)
+        c.drawCentredString(w / 2, h - 80, "TUMAKURU CITY CORPORATION")
+
+        c.setFillColor(HexColor('#FFFFFF'))
+        c.setFont("Helvetica", 11)
+        c.drawCentredString(w / 2, h - 102, "Tree Planting Milestone Certificate")
+
+        # Title
+        c.setFillColor(HexColor('#2ECC71'))
+        c.setFont("Helvetica-Bold", 36)
+        c.drawCentredString(w / 2, h - 170, "GREEN HERO AWARD")
+
+        # Name
+        full_name = user.get_full_name() or user.username
+        c.setFillColor(HexColor('#FFD700'))
+        c.setFont("Helvetica-Bold", 28)
+        c.drawCentredString(w / 2, h - 230, full_name.upper())
+
+        # Body
+        c.setFillColor(HexColor('#E8E8E8'))
+        c.setFont("Helvetica", 12)
+        c.drawCentredString(w / 2, h - 270, f"For achieving {certificate.milestone} Tree Points by planting trees.")
+        c.drawCentredString(w / 2, h - 292, f"Trees saved: {certificate.trees_count_at_issue}  ·  Tree Points: {certificate.tree_points_at_issue}")
+
+        # Info
+        c.setFillColor(HexColor('#B0C4DE'))
+        c.setFont("Helvetica", 10)
+        c.drawCentredString(w / 2, 90, f"Certificate No: {certificate.certificate_number}")
+        c.drawCentredString(w / 2, 72, f"Issue Date: {certificate.issued_date.strftime('%d %b %Y')}")
+
+        c.save()
+        buffer.seek(0)
+        return buffer
+    except ImportError:
+        return None
+
+
 def generate_certificate_pdf(citizen, certificate):
     """
     Generate a professional PDF certificate using ReportLab.

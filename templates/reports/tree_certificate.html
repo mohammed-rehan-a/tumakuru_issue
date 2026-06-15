@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block title %}Tree Planting Certificate{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <div class="container px-4">
+    <nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li><li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li><li class="breadcrumb-item active">Tree Certificate</li></ol></nav>
+    <h1 class="mt-2">🌱 Tree Planting Certificate</h1>
+  </div>
+  <div class="page-hero-tricolor"></div>
+</div>
+
+<div class="container px-4 py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="certificate-card mb-4">
+        <div style="border-bottom:1px solid rgba(201,168,76,0.25); padding-bottom:20px; margin-bottom:24px; text-align:center">
+          <div style="color:rgba(255,255,255,.55); font-size:13px; letter-spacing:2px; text-transform:uppercase">Official Certificate</div>
+        </div>
+
+        <div style="text-align:center; color:var(--gold-light); font-size:24px; margin-bottom:18px; letter-spacing:8px">
+          ★ ★ ★
+        </div>
+
+        <div style="text-align:center; margin-bottom:24px">
+          <span class="cert-icon"><i class="fas fa-tree"></i></span>
+          <h2 style="font-family:'Playfair Display',serif; font-size:2rem; font-weight:700; color:var(--gold-light); margin-bottom:6px">Tree Planter</h2>
+          <div style="font-size:14px; color:rgba(255,255,255,.65); letter-spacing:1px">CERTIFICATE OF ENVIRONMENT CONTRIBUTION</div>
+        </div>
+
+        <div style="border-top:1px solid rgba(201,168,76,.2); border-bottom:1px solid rgba(201,168,76,.2); padding:16px 0; margin-bottom:24px; text-align:center">
+          <div style="font-size:13px; color:rgba(255,255,255,.6); margin-bottom:6px">This certificate is proudly presented to</div>
+          <div style="font-family:'Playfair Display',serif; font-size:2rem; font-weight:700; color:var(--gold-light)">
+            {{ certificate.citizen.get_full_name|default:certificate.citizen.username }}
+          </div>
+        </div>
+
+        <div style="text-align:center; font-size:14px; color:rgba(255,255,255,.7); line-height:1.8; margin-bottom:24px">
+          In recognition of planting a tree and contributing to a greener Tumakuru City.<br>
+          You have earned <strong style="color:var(--gold-light)">{{ certificate.tree_points }} Tree Points</strong>.
+        </div>
+
+        <div class="row g-3 mb-24">
+          <div class="col-4">
+            <div style="background:rgba(255,255,255,.06); border:1px solid rgba(201,168,76,.2); border-radius:8px; padding:14px; text-align:center">
+              <div style="font-size:11px; color:rgba(255,255,255,.5); text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px">Certificate No.</div>
+              <div style="font-family:monospace; font-weight:700; color:var(--gold-light); font-size:11px">{{ certificate.certificate_number }}</div>
+            </div>
+          </div>
+          <div class="col-4">
+            <div style="background:rgba(255,255,255,.06); border:1px solid rgba(201,168,76,.2); border-radius:8px; padding:14px; text-align:center">
+              <div style="font-size:11px; color:rgba(255,255,255,.5); text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px">Issue Date</div>
+              <div style="font-weight:700; color:var(--gold-light); font-size:12px">{{ certificate.issued_date|date:"d M Y" }}</div>
+            </div>
+          </div>
+          <div class="col-4">
+            <div style="background:rgba(255,255,255,.06); border:1px solid rgba(201,168,76,.2); border-radius:8px; padding:14px; text-align:center">
+              <div style="font-size:11px; color:rgba(255,255,255,.5); text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px">Tree Points</div>
+              <div style="font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:700; color:var(--gold-light)">{{ certificate.tree_points }}</div>
+            </div>
+          </div>
+        </div>
+
+        {% if certificate.environment_save.tree_image %}
+        <div style="margin-top:10px; text-align:center">
+          <div style="font-size:12px; color:rgba(255,255,255,.55); margin-bottom:10px">Uploaded Tree Photo</div>
+          <img src="{{ certificate.environment_save.tree_image.url }}" alt="Tree photo" style="max-width:100%; border-radius:12px; border:1px solid rgba(255,255,255,.12)">
+        </div>
+        {% endif %}
+      </div>
+
+      <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap">
+        <a href="{% url 'dashboard' %}" class="btn-navy">
+          <i class="fas fa-tachometer-alt"></i> Back to Dashboard
+        </a>
+        <a href="{% url 'save_environment' %}" class="btn-primary-civic" style="background:var(--green); box-shadow:none;">
+          <i class="fas fa-leaf"></i> Save Another Tree
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

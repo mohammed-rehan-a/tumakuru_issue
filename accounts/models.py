@@ -88,6 +88,25 @@ class CitizenCertificate(models.Model):
         return f"Certificate #{self.certificate_number} — {self.citizen.user.get_full_name()}"
 
 
+class CitizenBadge(models.Model):
+    BADGE_CHOICES = [
+        ('tree_planter', 'Tree Planter'),
+    ]
+
+    citizen = models.ForeignKey(CitizenProfile, on_delete=models.CASCADE, related_name='badges')
+    badge = models.CharField(max_length=50, choices=BADGE_CHOICES)
+    awarded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Citizen Badge"
+        verbose_name_plural = "Citizen Badges"
+        ordering = ['-awarded_at']
+        unique_together = ('citizen', 'badge')
+
+    def __str__(self):
+        return f"{self.get_badge_display()} — {self.citizen.user.get_full_name() or self.citizen.user.username}"
+
+
 @receiver(post_save, sender=User)
 def create_profile(sender, instance, created, **kwargs):
     if created:
@@ -117,3 +136,20 @@ class OTPToken(models.Model):
 
     def __str__(self):
         return f"OTP for {self.user.username}"
+
+
+class PushSubscription(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='push_subscriptions')
+    endpoint = models.TextField(unique=True)
+    p256dh = models.CharField(max_length=255)
+    auth = models.CharField(max_length=255)
+    user_agent = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Push Subscription"
+        verbose_name_plural = "Push Subscriptions"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Push subscription for {self.user.username}"

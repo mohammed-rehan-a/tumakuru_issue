@@ -18,6 +18,9 @@ DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
 
+# Public site URL (used in notifications)
+SITE_URL = os.getenv('SITE_URL', 'http://127.0.0.1:8000')
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -136,6 +139,17 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 POINTS_PER_REPORT = 5
 POINTS_FOR_CERTIFICATE = 100
 
+# Environment save (tree planting)
+POINTS_PER_TREE_SAVE = 5
+
+# Tree points milestone for downloadable certificate
+TREE_POINTS_FOR_CERTIFICATE = 100
+
+# Web Push (VAPID) configuration (set these in .env)
+VAPID_PUBLIC_KEY = os.getenv('VAPID_PUBLIC_KEY', '')
+VAPID_PRIVATE_KEY = os.getenv('VAPID_PRIVATE_KEY', '')
+VAPID_CLAIMS_EMAIL = os.getenv('VAPID_CLAIMS_EMAIL', 'mailto:admin@tumakuru.gov.in')
+
 # City name
 CITY_NAME = "Tumakuru"
 CITY_FULL_NAME = "Tumakuru City Corporation"
@@ -151,28 +165,29 @@ CITY_STATE = "Karnataka"
 
 # Force real emails on Render, use console only locally if specified
 IS_ON_RENDER = os.getenv('RENDER', 'False').lower() == 'true'
+
+# Default to SMTP, but notifications.py uses send_email_robust which tries SendGrid API first
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend' if IS_ON_RENDER else ('django.core.mail.backends.console.EmailBackend' if os.getenv('EMAIL_DEBUG_CONSOLE', 'False') == 'True' else 'django.core.mail.backends.smtp.EmailBackend')
-EMAIL_HOST           = 'smtp.gmail.com'
-EMAIL_PORT           = 587
-EMAIL_USE_TLS        = True
-EMAIL_HOST_USER      = os.getenv('EMAIL_HOST_USER', 'tumakurucity@gmail.com')      # ← Change this
+
+EMAIL_HOST           = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT           = int(os.getenv('EMAIL_PORT', 587))
+EMAIL_USE_TLS        = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
+EMAIL_HOST_USER      = os.getenv('EMAIL_HOST_USER', 'tumakurucity@gmail.com')      # ← Update in Render Env Vars
 EMAIL_HOST_PASSWORD  = os.getenv('EMAIL_HOST_PASSWORD', 'wotz lymy yjzb opxx')    # ← 16-char App Password
 DEFAULT_FROM_EMAIL   = os.getenv('DEFAULT_FROM_EMAIL', 'Tumakuru City Corporation <tumakurucity@gmail.com>')
 
 # Set to True to test without sending real emails (prints to console)
-EMAIL_DEBUG_CONSOLE  = os.getenv('EMAIL_DEBUG_CONSOLE', 'False') == 'True'   # Set True during development
+EMAIL_DEBUG_CONSOLE  = os.getenv('EMAIL_DEBUG_CONSOLE', 'False') == 'True'
 
 # ─────────────────────────────────────────────────
 # SMS CONFIGURATION (Fast2SMS — Free Indian API)
 # ─────────────────────────────────────────────────
-# 1. Register free at https://www.fast2sms.com
-# 2. Go to Dev API → copy your API key
-# 3. Paste it below
+FAST2SMS_API_KEY = os.getenv('FAST2SMS_API_KEY', 'Nlgj9dSIsM61DEtyzTeZxU0P3VcYCv2GX8OwJbhkrnoqKpQL7moyz3nbs05kZep2EV8hOKifTa4dtqMW')
 
-FAST2SMS_API_KEY = os.getenv('FAST2SMS_API_KEY', 'Nlgj9dSIsM61DEtyzTeZxU0P3VcYCv2GX8OwJbhkrnoqKpQL7moyz3nbs05kZep2EV8hOKifTa4dtqMW')   # ← Change this
-
-# SendGrid API Configuration (for reliable email delivery on Render)
-SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY', 'VBA79WJ95WPEXVWY2U1YE523')
+# SendGrid API Configuration (Recommended for Render)
+# Get a key from https://app.sendgrid.com/settings/api_keys
+# Add SENDGRID_API_KEY to your Render environment variables
+SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY', '')  # Add this to Render Environment Variables
 
 # ─────────────────────────────────────────────────
 # SITE URL (for links in emails)

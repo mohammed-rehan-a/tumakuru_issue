@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+{% block title %}Save Environment{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <div class="container px-4">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+        <li class="breadcrumb-item active">Save Environment</li>
+      </ol>
+    </nav>
+    <div class="mt-2">
+      <h1>Save Environment</h1>
+      <p style="opacity:.75;margin:0">
+        Upload a photo of the tree you planted and earn <strong>{{ points_for_tree }} points</strong>.
+      </p>
+    </div>
+  </div>
+  <div class="page-hero-tricolor"></div>
+</div>
+
+<div class="container px-4 py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <div class="detail-card p-4">
+        <div class="d-flex align-items-start gap-3 mb-3">
+          <div class="stat-icon" style="background:#EDFAEE; color:var(--green)"><i class="fas fa-tree"></i></div>
+          <div>
+            <div style="font-weight:700; color:var(--navy); font-size:16px;">Upload your planted tree photo</div>
+            <div style="font-size:13px; color:var(--gray-600);">You will receive points and a badge after saving.</div>
+          </div>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="mb-4">
+            <label class="form-label" style="font-weight:600;">Tree Photo</label>
+            <div class="photo-upload-box" style="border: 2px dashed var(--gray-300); border-radius: 12px; padding: 30px; text-align: center; background: #f9f9f9;">
+               <div class="upload-options" id="options_tree">
+                  <label for="id_tree_image" style="cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:8px;">
+                    <i class="fas fa-cloud-upload-alt" style="font-size:32px; color:var(--gray-300)"></i>
+                    <span style="font-weight:600">Click to upload photo</span>
+                  </label>
+                  <div style="margin: 10px 0; color: #ccc; font-size: 12px;">— OR —</div>
+                  <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 camera-btn" data-input="id_tree_image">
+                    <i class="fas fa-camera me-1"></i> Take Photo
+                  </button>
+               </div>
+               <div class="preview-container d-none" id="preview_tree">
+                  <img src="" class="img-fluid rounded mb-2" style="max-height: 200px; border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                  <br>
+                  <button type="button" class="btn btn-sm btn-link text-danger remove-photo" data-input="id_tree_image">Remove and try again</button>
+               </div>
+               <input type="file" name="tree_image" accept="image/*" capture="environment" id="id_tree_image" class="form-control d-none">
+            </div>
+            {% if form.tree_image.errors %}
+              <div class="text-danger small mt-1">{{ form.tree_image.errors }}</div>
+            {% endif %}
+          </div>
+
+          <div class="d-flex gap-2 flex-wrap">
+            <button type="submit" class="btn-primary-civic">
+              <i class="fas fa-leaf"></i> Save Environment
+            </button>
+            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary" style="border-radius:12px;">
+              Cancel
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Camera Modal -->
+<div class="modal fade" id="cameraModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content overflow-hidden" style="border-radius: 20px; border: none; background: #000;">
+      <div class="modal-body p-0 position-relative">
+        <video id="cameraVideo" autoplay playsinline style="width: 100%; height: auto; display: block;"></video>
+        <div class="camera-controls position-absolute bottom-0 start-0 end-0 p-4 d-flex justify-content-between align-items-center" style="background: linear-gradient(transparent, rgba(0,0,0,0.7));">
+          <button type="button" class="btn btn-lg btn-light rounded-circle" id="closeCamera" style="width: 50px; height: 50px;"><i class="fas fa-times"></i></button>
+          <button type="button" class="btn btn-lg btn-primary rounded-circle shadow-lg" id="capturePhoto" style="width: 70px; height: 70px; border: 4px solid white;"><i class="fas fa-camera fa-lg"></i></button>
+          <button type="button" class="btn btn-lg btn-light rounded-circle" id="switchCamera" style="width: 50px; height: 50px;"><i class="fas fa-sync"></i></button>
+        </div>
+        <div id="cameraLoading" class="position-absolute top-0 start-0 end-0 bottom-0 d-flex align-items-center justify-content-center bg-dark" style="z-index: 10;">
+          <div class="text-center text-white">
+            <div class="spinner-border mb-2" role="status"></div>
+            <div>Initializing Camera...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<canvas id="captureCanvas" style="display:none"></canvas>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let currentStream = null;
+    let useFrontCamera = false;
+    const cameraModal = new bootstrap.Modal(document.getElementById('cameraModal'));
+    const video = document.getElementById('cameraVideo');
+    const canvas = document.getElementById('captureCanvas');
+    const loading = document.getElementById('cameraLoading');
+    const fileInput = document.getElementById('id_tree_image');
+
+    async function startCamera() {
+        if (currentStream) {
+            currentStream.getTracks().forEach(track => track.stop());
+        }
+        loading.classList.remove('d-none');
+        try {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                throw new Error("Your browser does not support camera access or you are not on a secure (HTTPS) connection.");
+            }
+            currentStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: useFrontCamera ? "user" : "environment" }
+            });
+            video.srcObject = currentStream;
+            loading.classList.add('d-none');
+        } catch (err) {
+            console.error("Error accessing camera:", err);
+            alert(err.message || "Could not access camera. Please ensure you've granted permissions.");
+            cameraModal.hide();
+        }
+    }
+
+    document.querySelector('.camera-btn').addEventListener('click', () => {
+        cameraModal.show();
+        startCamera();
+    });
+
+    document.getElementById('closeCamera').addEventListener('click', () => {
+        if (currentStream) currentStream.getTracks().forEach(track => track.stop());
+        cameraModal.hide();
+    });
+
+    document.getElementById('switchCamera').addEventListener('click', () => {
+        useFrontCamera = !useFrontCamera;
+        startCamera();
+    });
+
+    document.getElementById('capturePhoto').addEventListener('click', () => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        canvas.toBlob(blob => {
+            const file = new File([blob], "tree_capture.jpg", { type: "image/jpeg" });
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            fileInput.files = dataTransfer.files;
+
+            document.getElementById('preview_tree').querySelector('img').src = URL.createObjectURL(blob);
+            document.getElementById('options_tree').classList.add('d-none');
+            document.getElementById('preview_tree').classList.remove('d-none');
+
+            if (currentStream) currentStream.getTracks().forEach(track => track.stop());
+            cameraModal.hide();
+        }, 'image/jpeg', 0.9);
+    });
+
+    document.querySelector('.remove-photo').addEventListener('click', () => {
+        fileInput.value = "";
+        document.getElementById('options_tree').classList.remove('d-none');
+        document.getElementById('preview_tree').classList.add('d-none');
+    });
+
+    fileInput.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+            document.getElementById('preview_tree').querySelector('img').src = URL.createObjectURL(this.files[0]);
+            document.getElementById('options_tree').classList.add('d-none');
+            document.getElementById('preview_tree').classList.remove('d-none');
+        }
+    });
+});
+</script>
+{% endblock %}
+

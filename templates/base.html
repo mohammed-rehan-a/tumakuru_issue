@@ -5,10 +5,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% block title %}TCC Civic{% endblock %} — Tumakuru City Corporation</title>
-  <meta name="description" content="TCC Civic: The official Tumakuru City Corporation portal for reporting civic issues. Report road damage, garbage, and water leaks to win Best Citizen rewards.">
-  <meta name="keywords" content="tcc civic, tumakuru civic, tcc report issue, tumakuru city corporation, civic portal tumkur, citizen grievance tumakuru">
-  
+  <title>{% block title %}{% trans "TCC Civic" %}{% endblock %} — {% trans "Tumakuru City Corporation" %}</title>
+  <meta name="description"
+    content="{% trans 'TCC Civic: The official Tumakuru City Corporation portal for reporting civic issues. Report road damage, garbage, and water leaks to win Best Citizen rewards.' %}">
+  <meta name="keywords"
+    content="{% trans 'tcc civic, tumakuru civic, tcc report issue, tumakuru city corporation, civic portal tumkur, citizen grievance tumakuru' %}">
+
   <!-- Structured Data for Google -->
   <script type="application/ld+json">
   {
@@ -244,6 +246,11 @@
             <a class="nav-link" href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt me-1"></i> {% trans "Dashboard" %}</a>
           </li>
           <li class="nav-item">
+            <a class="nav-link" href="{% url 'save_environment' %}">
+              <i class="fas fa-leaf me-1"></i> {% trans "Save Environment" %}
+            </a>
+          </li>
+          <li class="nav-item">
             <a class="nav-link btn-submit-nav" href="{% url 'submit_report' %}">
               <i class="fas fa-plus-circle me-1"></i> {% trans "Report Issue" %}
             </a>
@@ -389,8 +396,13 @@
     <div class="footer-bottom">
       <div class="container px-4">
         <div class="d-flex flex-wrap justify-content-between align-items-center">
-          <div>© 2024 Tumakuru City Corporation. All Rights Reserved.</div>
-          <div class="d-flex gap-3">
+          <div class="text-center text-md-start">© 2024 Tumakuru City Corporation. All Rights Reserved.</div>
+          <div class="text-center my-2 my-md-0" style="font-size: 0.9rem; opacity: 0.8;">
+            <i class="fas fa-code me-1"></i> Developed by 
+            <a href="{% url 'portfolio' %}" style="text-decoration: none; color: inherit;"><strong>Mohammed Rehan A</strong></a> 
+            & <strong>Nagesh</strong>
+          </div>
+          <div class="d-flex gap-3 justify-content-center">
             <a href="#">Privacy Policy</a>
             <a href="#">Terms of Use</a>
             <a href="#">Accessibility</a>

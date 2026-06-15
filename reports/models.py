@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.conf import settings
 
 
 class IssueCategory(models.Model):
@@ -96,6 +97,21 @@ class IssueReport(models.Model):
             random_part = ''.join(random.choices(string.digits, k=6))
             self.report_id = f"{prefix}{year}{random_part}"
             
+            
+        # Point deduction logic for rejected reports
+        if not is_new and old_status != 'rejected' and self.status == 'rejected' and self.is_points_given:
+            profile = self.citizen.profile
+            if profile.points >= self.points_awarded:
+                profile.points -= self.points_awarded
+            else:
+                profile.points = 0
+            profile.save()
+            
+            self.points_awarded = 0
+            self.is_points_given = False
+            # We don't need to call super().save() again because we are still in the save process
+            # and these changes to self will be saved by the super().save() call below.
+
         super().save(*args, **kwargs)
         
         # Trigger notifications if status changed to in_progress or resolved
@@ -190,3 +206,52 @@ class ReportFeedback(models.Model):
 
     def __str__(self):
         return f"Feedback for {self.report.report_id} - {self.rating} Stars"
+
+
+class EnvironmentSave(models.Model):
+    citizen = models.ForeignKey(User, on_delete=models.CASCADE, related_name='environment_saves')
+    tree_image = models.ImageField(upload_to='environment_trees/%Y/%m/')
+    points_awarded = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Environment Save"
+        verbose_name_plural = "Environment Saves"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Environment Save by {self.citizen.username} (+{self.points_awarded} pts)"
+
+
+class TreePlantingCertificate(models.Model):
+    citizen = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tree_certificates')
+    environment_save = models.OneToOneField(EnvironmentSave, on_delete=models.CASCADE, related_name='certificate')
+    certificate_number = models.CharField(max_length=40, unique=True)
+    issued_date = models.DateTimeField(auto_now_add=True)
+    tree_points = models.PositiveIntegerField(default=5)
+
+    class Meta:
+        verbose_name = "Tree Planting Certificate"
+        verbose_name_plural = "Tree Planting Certificates"
+        ordering = ['-issued_date']
+
+    def __str__(self):
+        return f"Tree Certificate #{self.certificate_number} — {self.citizen.username}"
+
+
+class TreeMilestoneCertificate(models.Model):
+    citizen = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tree_milestone_certificates')
+    certificate_number = models.CharField(max_length=50, unique=True)
+    issued_date = models.DateTimeField(auto_now_add=True)
+    milestone = models.PositiveIntegerField()  # 100, 200, 300 ...
+    tree_points_at_issue = models.PositiveIntegerField()
+    trees_count_at_issue = models.PositiveIntegerField(default=0)
+    is_downloaded = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = "Tree Milestone Certificate"
+        verbose_name_plural = "Tree Milestone Certificates"
+        ordering = ['-issued_date']
+
+    def __str__(self):
+        return f"Tree Milestone #{self.certificate_number} — {self.citizen.username}"
