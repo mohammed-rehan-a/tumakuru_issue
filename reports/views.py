@@ -715,3 +715,7 @@ def robots_txt(request):
 def portfolio(request):
     return render(request, 'portfolio.html')
 
+
+def nagesh_portfolio(request):
+    return render(request, 'nagesh_portfolio.html')
+
