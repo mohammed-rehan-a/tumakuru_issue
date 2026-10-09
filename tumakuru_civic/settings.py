@@ -84,19 +84,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'tumakuru_civic.wsgi.application'
 
-import dj_database_url
-
-# Configure database dynamically. (PostgreSQL via DATABASE_URL or fallback SQLite)
-database_url = os.getenv('DATABASE_URL')
-if database_url:
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=database_url,
-            conn_max_age=600,
-            ssl_require=database_url.startswith('postgres') or database_url.startswith('postgresql')
-        )
-    }
-elif os.getenv('VERCEL'):
+# Database Configuration (SQLite)
+if os.getenv('VERCEL'):
     # In Vercel serverless environment, local filesystem is read-only except /tmp
     import shutil
     tmp_db = Path('/tmp') / 'db.sqlite3'
@@ -113,7 +102,6 @@ elif os.getenv('VERCEL'):
         }
     }
 else:
-    # Local fallback or SQLite on Render if no PostgreSQL database is attached
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
