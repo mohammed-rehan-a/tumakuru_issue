@@ -16,7 +16,21 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'tumakuru-civic-secret-key-change-in-produc
 
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.getenv('ALLOWED_HOSTS', '*,localhost,127.0.0.1,.vercel.app,.onrender.com').split(',')
+    if host.strip()
+]
+
+# CSRF Trusted Origins for Vercel and production deployments
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv(
+        'CSRF_TRUSTED_ORIGINS',
+        'https://*.vercel.app,https://*.onrender.com,http://127.0.0.1,http://localhost'
+    ).split(',')
+    if origin.strip()
+]
 
 # Public site URL (used in notifications)
 SITE_URL = os.getenv('SITE_URL', 'http://127.0.0.1:8000')
@@ -72,7 +86,7 @@ WSGI_APPLICATION = 'tumakuru_civic.wsgi.application'
 
 import dj_database_url
 
-# Configure database dynamically. Render provides DATABASE_URL when PostgreSQL is attached.
+# Configure database dynamically. (PostgreSQL via DATABASE_URL or fallback SQLite)
 database_url = os.getenv('DATABASE_URL')
 if database_url:
     DATABASES = {
@@ -81,6 +95,22 @@ if database_url:
             conn_max_age=600,
             ssl_require=database_url.startswith('postgres') or database_url.startswith('postgresql')
         )
+    }
+elif os.getenv('VERCEL'):
+    # In Vercel serverless environment, local filesystem is read-only except /tmp
+    import shutil
+    tmp_db = Path('/tmp') / 'db.sqlite3'
+    local_db = BASE_DIR / 'db.sqlite3'
+    if not tmp_db.exists() and local_db.exists():
+        try:
+            shutil.copy2(local_db, tmp_db)
+        except Exception:
+            pass
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': tmp_db if tmp_db.exists() else (BASE_DIR / 'db.sqlite3'),
+        }
     }
 else:
     # Local fallback or SQLite on Render if no PostgreSQL database is attached
@@ -124,7 +154,11 @@ STORAGES = {
 }
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+if os.getenv('VERCEL'):
+    MEDIA_ROOT = Path('/tmp') / 'media'
+    MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
+else:
+    MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
